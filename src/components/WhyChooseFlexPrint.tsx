@@ -36,7 +36,7 @@ const WhyChooseFlexPrint = () => {
             </span>
           </h2>
           <p className="mt-3 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            We’re committed to exceptional quality, speedy delivery, and bespoke design—crafted for results that impress.
+            We're committed to providing exceptional printing services with quick turnaround times and outstanding customer service.
           </p>
           <div className="mx-auto mt-6 h-[2px] w-28 sm:w-36 rounded-full bg-gradient-to-r from-[#588B8B] via-[#F28F3B] to-[#C8553D]" />
         </div>

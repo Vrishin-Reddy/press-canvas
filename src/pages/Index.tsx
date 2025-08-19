@@ -39,7 +39,7 @@ const Index = () => {
           <p className="text-lg mb-8 max-w-2xl mx-auto">
             Book your printing service today and experience the FlexPrint difference.
           </p>
-          <Button size="lg" variant="outline" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90" asChild>
+          <Button size="lg" className="bg-brand-tangerine-500 text-brand-white hover:bg-brand-tangerine-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-tangerine-500/40 focus-visible:ring-offset-2" asChild>
             <Link to="/booking">Book Now</Link>
           </Button>
         </div>
