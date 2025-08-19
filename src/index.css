@@ -1,0 +1,119 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+		/* Light theme (global) */
+		--background: 0 0% 100%;               /* brand.white */
+		--foreground: 182 18% 32%;             /* brand.dark-cyan-400 approx */
+
+		--card: 0 0% 100%;
+		--card-foreground: 182 18% 32%;
+
+		--popover: 0 0% 100%;
+		--popover-foreground: 182 18% 32%;
+
+		--primary: 183 22% 45%;                /* brand.dark-cyan-500 (#588b8b) */
+		--primary-foreground: 0 0% 100%;       /* white */
+
+		--secondary: 20 100% 85%;              /* brand.apricot-500 (#ffd5c2) */
+		--secondary-foreground: 182 18% 32%;
+
+		--muted: 20 72% 92%;                   /* apricot light */
+		--muted-foreground: 182 18% 32%;
+
+		--accent: 28 88% 59%;                  /* brand.tangerine-500 (#f28f3b) */
+		--accent-foreground: 0 0% 100%;
+
+		--destructive: 10 56% 51%;             /* brand.jasper-500 (#c8553d) */
+		--destructive-foreground: 0 0% 100%;
+
+		--border: 182 18% 80%;
+		--input: 182 18% 80%;
+		--ring: 183 22% 45%;
+
+		/* Optional sidebar/chart tokens if present */
+		--sidebar-background: 0 0% 100%;
+		--sidebar-foreground: 182 18% 32%;
+		--sidebar-muted: 20 72% 92%;
+		--sidebar-muted-foreground: 182 18% 32%;
+		--sidebar-border: 182 18% 80%;
+		--sidebar-ring: 183 22% 45%;
+  }
+
+  .dark {
+		/* Dark theme */
+		--background: 183 18% 10%;             /* brand.dark-cyan-100 */
+		--foreground: 0 0% 100%;
+
+		--card: 183 18% 12%;
+		--card-foreground: 0 0% 100%;
+
+		--popover: 183 18% 10%;
+		--popover-foreground: 0 0% 100%;
+
+		--primary: 28 88% 59%;                 /* tangerine-500 pops on dark */
+		--primary-foreground: 0 0% 100%;
+
+		--secondary: 10 56% 51%;               /* jasper-500 */
+		--secondary-foreground: 0 0% 100%;
+
+		--muted: 183 18% 18%;
+		--muted-foreground: 0 0% 95%;
+
+		--accent: 183 22% 45%;                 /* dark-cyan-500 */
+		--accent-foreground: 0 0% 100%;
+
+		--destructive: 10 56% 51%;
+		--destructive-foreground: 0 0% 100%;
+
+		--border: 183 18% 22%;
+		--input: 183 18% 22%;
+		--ring: 183 22% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl font-bold;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl font-bold;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+
+  .section-container {
+    @apply container mx-auto px-4 py-12 md:py-24;
+  }
+}
+
+@layer utilities {
+  @keyframes print-move {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(14px); }
+  }
+}
