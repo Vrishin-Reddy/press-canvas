@@ -13,12 +13,14 @@ import {
   Gift,
   CheckCircle2,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type Service = {
   name: string;
   description: string;
   features: string[];
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  slug?: string; // used to preselect on booking page
 };
 
 const services: Service[] = [
@@ -45,6 +47,7 @@ const services: Service[] = [
       "Long-lasting",
     ],
     icon: Disc,
+    slug: "vinyl-printing",
   },
   {
     name: "Foam Board Printing",
@@ -57,6 +60,7 @@ const services: Service[] = [
       "Professional finish",
     ],
     icon: Square,
+    slug: "foam-board-printing",
   },
   {
     name: "Flute Board Printing",
@@ -69,6 +73,7 @@ const services: Service[] = [
       "Custom artwork",
     ],
     icon: PanelBottom,
+    slug: "flute-board-printing",
   },
   {
     name: "Pullout Standees",
@@ -76,6 +81,7 @@ const services: Service[] = [
       "Portable pullout standees perfect for promotions, exhibitions, and events.",
     features: ["Easy setup", "Custom graphics", "Reusable", "Travel-friendly"],
     icon: PanelsTopLeft,
+    slug: "pullout-standees",
   },
   {
     name: "Visiting Cards",
@@ -88,6 +94,7 @@ const services: Service[] = [
       "Bulk pricing available",
     ],
     icon: IdCard,
+    slug: "visiting-cards",
   },
   {
     name: "Flex Banners",
@@ -100,6 +107,7 @@ const services: Service[] = [
       "Quick turnaround",
     ],
     icon: Layout,
+    slug: "flex-banners",
   },
   {
     name: "Letter Pads",
@@ -112,6 +120,7 @@ const services: Service[] = [
       "Corporate branding",
     ],
     icon: FileText,
+    slug: "letter-pads",
   },
   {
     name: "Wedding Cards Printing",
@@ -124,6 +133,7 @@ const services: Service[] = [
       "Complete wedding sets",
     ],
     icon: Heart,
+    slug: "wedding-cards",
   },
   {
     name: "Stickers",
@@ -136,6 +146,7 @@ const services: Service[] = [
       "Small to large quantities",
     ],
     icon: Sticker,
+    slug: "stickers",
   },
   {
     name: "Invitation Cards",
@@ -148,6 +159,7 @@ const services: Service[] = [
       "RSVP options",
     ],
     icon: Mail,
+    slug: "invitation-cards",
   },
   {
     name: "Greeting Cards",
@@ -160,6 +172,7 @@ const services: Service[] = [
       "Custom artwork",
     ],
     icon: Gift,
+    slug: "greeting-cards",
   },
 ];
 
@@ -215,13 +228,13 @@ export default function ServicesSection(): JSX.Element {
 
                   {/* CTA */}
                   <div className="mt-6 md:mt-auto">
-                    <button
-                      type="button"
+                    <Link
+                      to={svc.slug ? `/booking?service=${svc.slug}` : "/booking"}
                       className="w-full inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#588B8B] via-[#F28F3B] to-[#C8553D] shadow-sm transition-all duration-300 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#588B8B] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900"
                       aria-label={`Book ${svc.name}`}
                     >
                       Book This Service
-                    </button>
+                    </Link>
                   </div>
 
                   {/* Subtle glow on hover */}
