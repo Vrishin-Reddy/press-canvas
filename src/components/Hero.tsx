@@ -5,6 +5,18 @@ import { Button } from '@/components/ui/button';
 const Hero = () => {
   return (
     <div className="relative bg-gradient-to-r from-brand-dark-cyan-500 to-brand-tangerine-500 text-brand-white">
+      {/* Left historical visual (faded B/W) */}
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-1/2 bg-cover bg-center grayscale opacity-25"
+        style={{
+          backgroundImage: "url('/old_hyderabad.jpg')",
+          maskImage:
+            'linear-gradient(to right, black 45%, rgba(0,0,0,0) 85%)',
+          WebkitMaskImage:
+            'linear-gradient(to right, black 45%, rgba(0,0,0,0) 85%)',
+        }}
+      />
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(hsl(var(--primary-foreground))_1px,transparent_1px)] [background-size:16px_16px]"></div>
       {/* Subtle printing lines animation */}
@@ -30,19 +42,18 @@ const Hero = () => {
                 <p className="text-sm opacity-90">Est. 1912</p>
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
-              Celebrating 100+ Years of Craftsmanship in Print
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-snug max-w-4xl break-words">
+              Printing Excellence Since 1912 – From the Nizam’s Era to the Digital Age
             </h1>
-            <p className="text-lg md:text-xl opacity-90 max-w-md">
-              Since 1912, we've been delivering exceptional multicolour offset printing services 
-              with unmatched quality and precision in Hyderabad.
+            <p className="text-lg md:text-xl opacity-90 max-w-2xl mt-2 leading-relaxed">
+              For over a century, Sri Sharada Press has been Hyderabad’s trusted name in printing—blending timeless heritage with cutting-edge technology to deliver unmatched results.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" asChild className="bg-brand-tangerine-500 text-brand-white hover:bg-brand-tangerine-400">
-                <Link to="/booking">Get Quote</Link>
+              <Button asChild size="lg" className="bg-white hover:bg-white/90 text-brand-dark-cyan-500 font-bold">
+                <Link to="/legacy">Explore Our Legacy</Link>
               </Button>
-              <Button variant="outline" size="lg" asChild className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                <Link to="/services">Our Services</Link>
+              <Button size="lg" asChild className="bg-brand-tangerine-500 text-brand-white hover:bg-brand-tangerine-400">
+                <Link to="/booking">Get a Quote Today</Link>
               </Button>
             </div>
           </div>

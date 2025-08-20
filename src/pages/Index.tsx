@@ -2,8 +2,10 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Hero from '@/components/Hero';
+import AboutSection from '@/components/AboutSection';
 import ServicesList from '@/components/ServicesList';
 import ServicesSection from '@/components/ServicesSection';
+import HomeTestimonials from '@/components/HomeTestimonials';
 import WhyChooseFlexPrint from '@/components/WhyChooseFlexPrint';
 
 const Index = () => {
@@ -12,8 +14,15 @@ const Index = () => {
       {/* Hero Section */}
       <Hero />
 
+      {/* About Section (sits directly under Hero) */}
+      <AboutSection />
+
+
       {/* Icon-centric Services Section (new) */}
       <ServicesSection />
+
+      {/* Testimonials Preview */}
+      <HomeTestimonials />
 
       {/* Why Choose Us Section (modernized) */}
       <WhyChooseFlexPrint />
