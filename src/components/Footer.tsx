@@ -16,7 +16,7 @@ const Footer = () => {
               <h3 className="text-xl font-bold">Sri Sharada Press</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Your one-stop solution for all flex printing and design needs. Quality service with quick turnaround times.
+              For more than a century, Sri Sharada Press has transformed ideas into print with integrity and innovation. Rooted in heritage, we continue to serve families and businesses with printing that endures.
             </p>
           </div>
 
