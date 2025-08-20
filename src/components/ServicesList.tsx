@@ -53,6 +53,13 @@ export const services: ServiceProps[] = [
     features: ['Festival specials', 'Personal messages', 'Quality cardstock', 'Custom artwork']
   },
   {
+    id: 'one-way-vision',
+    title: 'One Way Vision Stickers',
+    description: 'Perforated window graphics that allow one-way visibility with striking storefront branding.',
+    imageUrl: 'https://images.unsplash.com/photo-1520974735194-17139d00a0d6',
+    features: ['Perforated film', 'Weather resistant', 'Custom sizes', 'High-opacity print']
+  },
+  {
     id: 'poster-printing',
     title: 'Poster Printing',
     description: 'Large format posters for events, advertising, and promotional campaigns.',

@@ -12,6 +12,7 @@ import {
   Mail,
   Gift,
   CheckCircle2,
+  Eye,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -147,6 +148,19 @@ const services: Service[] = [
     ],
     icon: Sticker,
     slug: "stickers",
+  },
+  {
+    name: "One Way Vision Stickers",
+    description:
+      "Perforated window graphics that provide one‑way visibility—branding outside, clear view inside.",
+    features: [
+      "High-opacity print",
+      "Perforated for visibility",
+      "Custom sizes",
+      "UV and weather resistant",
+    ],
+    icon: Eye,
+    slug: "one-way-vision",
   },
   {
     name: "Invitation Cards",
