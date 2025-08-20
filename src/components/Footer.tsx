@@ -50,12 +50,20 @@ const Footer = () => {
           {/* Services */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Our Services</h4>
-            <ul className="space-y-2">
-              <li className="text-muted-foreground">Banner Printing</li>
-              <li className="text-muted-foreground">Wedding Card Design</li>
-              <li className="text-muted-foreground">Flyers & Pamphlets</li>
-              <li className="text-muted-foreground">Visiting Cards</li>
-              <li className="text-muted-foreground">One-way Vision Stickers</li>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+              <li><Link to="/booking?service=poster-printing" className="text-muted-foreground hover:text-foreground transition-colors">Poster Printing</Link></li>
+              <li><Link to="/booking?service=vinyl-printing" className="text-muted-foreground hover:text-foreground transition-colors">Vinyl Printing</Link></li>
+              <li><Link to="/booking?service=foam-board-printing" className="text-muted-foreground hover:text-foreground transition-colors">Foam Board Printing</Link></li>
+              <li><Link to="/booking?service=flute-board-printing" className="text-muted-foreground hover:text-foreground transition-colors">Flute Board Printing</Link></li>
+              <li><Link to="/booking?service=pullout-standees" className="text-muted-foreground hover:text-foreground transition-colors">Pullout Standees</Link></li>
+              <li><Link to="/booking?service=visiting-cards" className="text-muted-foreground hover:text-foreground transition-colors">Visiting Cards</Link></li>
+              <li><Link to="/booking?service=flex-banners" className="text-muted-foreground hover:text-foreground transition-colors">Flex Banners</Link></li>
+              <li><Link to="/booking?service=letter-pads" className="text-muted-foreground hover:text-foreground transition-colors">Letter Pads</Link></li>
+              <li><Link to="/booking?service=wedding-cards" className="text-muted-foreground hover:text-foreground transition-colors">Wedding Cards Printing</Link></li>
+              <li><Link to="/booking?service=stickers" className="text-muted-foreground hover:text-foreground transition-colors">Stickers</Link></li>
+              <li><Link to="/booking?service=invitation-cards" className="text-muted-foreground hover:text-foreground transition-colors">Invitation Cards</Link></li>
+              <li><Link to="/booking?service=greeting-cards" className="text-muted-foreground hover:text-foreground transition-colors">Greeting Cards</Link></li>
+              <li><Link to="/booking?service=one-way-vision" className="text-muted-foreground hover:text-foreground transition-colors">One Way Vision Stickers</Link></li>
             </ul>
           </div>
 
