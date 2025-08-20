@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Hero from '@/components/Hero';
 import ServicesList from '@/components/ServicesList';
+import ServicesSection from '@/components/ServicesSection';
 import WhyChooseFlexPrint from '@/components/WhyChooseFlexPrint';
 
 const Index = () => {
@@ -11,23 +12,8 @@ const Index = () => {
       {/* Hero Section */}
       <Hero />
 
-      {/* Services Section */}
-      <section className="section-container">
-        <div className="text-center mb-12">
-          <h2 className="mb-4">Our Printing Services</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From visiting cards to wedding invitations, experience our complete range of premium printing services.
-          </p>
-        </div>
-        
-        <ServicesList limit={3} />
-        
-        <div className="mt-10 text-center">
-          <Button variant="outline" size="lg" asChild>
-            <Link to="/services">View All Services</Link>
-          </Button>
-        </div>
-      </section>
+      {/* Icon-centric Services Section (new) */}
+      <ServicesSection />
 
       {/* Why Choose Us Section (modernized) */}
       <WhyChooseFlexPrint />
