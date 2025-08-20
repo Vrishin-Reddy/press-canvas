@@ -1,5 +1,5 @@
 
-import ServicesList from '@/components/ServicesList';
+import ServicesSection from '@/components/ServicesSection';
 
 const Services = () => {
   return (
@@ -15,10 +15,8 @@ const Services = () => {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="section-container">
-        <ServicesList />
-      </section>
+      {/* Services Section (icon-centric) */}
+      <ServicesSection />
 
       {/* Process Section */}
       <section className="bg-muted py-16">
