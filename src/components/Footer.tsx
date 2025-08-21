@@ -108,14 +108,8 @@ const Footer = () => {
         <div className="md:hidden space-y-6">
           <div className="rounded-2xl border border-muted/15 bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm hover:shadow-md motion-safe:transition-all will-change-transform p-5">
             <div className="flex items-center gap-3 mb-4">
-              <img
-                src="/logo.png"
-                alt="Sri Sharada Press logo"
-                className="h-14 w-14 md:h-16 md:w-16 rounded-full object-cover ring-1 ring-muted/30"
-                loading="lazy"
-                decoding="async"
-              />
-              <span className="text-2xl md:text-3xl font-semibold tracking-tight">Sri Sharada Press</span>
+              <img src="/logo.png" alt="Sri Sharada Press logo" className="h-12 w-12 rounded-full object-cover ring-1 ring-muted/30" loading="lazy" decoding="async" />
+              <span className="text-xl font-semibold tracking-tight">Sri Sharada Press</span>
             </div>
             <p className="text-base text-muted-foreground">
               For more than a century, Sri Sharada Press has transformed ideas into print with integrity and innovation. Rooted in heritage, we continue to serve families and businesses with printing that endures.
@@ -159,7 +153,7 @@ const Footer = () => {
             <AccordionItem value="contact">
               <AccordionTrigger>Contact Us</AccordionTrigger>
               <AccordionContent>
-                <address className="not-italic text-base space-y-2">
+                <address className="not-italic text-base space-y-2 break-words">
                   <a
                     href={MAPS_URL}
                     target="_blank"
@@ -168,7 +162,7 @@ const Footer = () => {
                     className="group inline-flex items-start gap-2 hover:text-brand-dark-cyan transition-colors"
                     aria-label={`Open ${ADDRESS} in Google Maps`}
                   >
-                    <span className="relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-brand-dark-cyan after:transition-all group-hover:after:w-full">
+                    <span className="relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-brand-dark-cyan after:transition-all group-hover:after:w-full break-words">
                       {ADDRESS}
                     </span>
                   </a>
@@ -194,7 +188,7 @@ const Footer = () => {
 
       <button
         onClick={scrollToTop}
-        className="fixed bottom-6 right-6 h-10 w-10 rounded-full bg-brand-tangerine-500 text-brand-white shadow-md hover:bg-brand-tangerine-400 focus-visible:ring-2"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-10 w-10 rounded-full bg-brand-tangerine-500 text-brand-white shadow-md hover:bg-brand-tangerine-400 focus-visible:ring-2"
         aria-label="Back to top"
       >
         <ArrowUp className="h-5 w-5 mx-auto" aria-hidden />

@@ -52,7 +52,7 @@ const Navbar = () => {
     }`;
 
   // Ensure navbar height matches or exceeds the logo size
-  const navHeightClass = "h-20 md:h-24";
+  const navHeightClass = "h-16 md:h-24";
   const shadowClass = scrolled ? "shadow-sm" : "shadow-none";
   const accentOpacity = scrolled ? "opacity-100" : "opacity-0";
 
@@ -72,8 +72,8 @@ const Navbar = () => {
         <div className={`container mx-auto px-4 ${navHeightClass} motion-safe:transition-[height] flex items-center justify-between`}>
           {/* Left: Brand */}
           <Link to="/" className="inline-flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
-            <img src="/logo.png" alt="Sri Sharada Press logo" className="h-20 w-20 md:h-24 md:w-24 rounded-full object-cover ring-1 ring-muted/30" />
-            <span className="font-heading text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-brand-dark-cyan-500 via-brand-tangerine-500 to-brand-jasper-500 bg-clip-text text-transparent">Sri Sharada Press</span>
+            <img src="/logo.png" alt="Sri Sharada Press logo" className="h-12 w-12 sm:h-16 sm:w-16 md:h-24 md:w-24 rounded-full object-cover ring-1 ring-muted/30" />
+            <span className="font-heading text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-brand-dark-cyan-500 via-brand-tangerine-500 to-brand-jasper-500 bg-clip-text text-transparent">Sri Sharada Press</span>
           </Link>
 
           {/* Right: Desktop nav */}
