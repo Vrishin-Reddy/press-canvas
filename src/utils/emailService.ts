@@ -99,3 +99,74 @@ export const sendBookingEmailWithFeedback = async (data: EmailData): Promise<boo
     return false;
   }
 };
+
+// Contact form email payload
+export interface ContactEmailData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: 'General Inquiry' | 'Quote Request' | 'Support' | 'Feedback';
+  message: string;
+  deadline?: Date;
+  allowWhatsApp?: boolean;
+  attachment?: File | undefined;
+}
+
+// Generic contact email sender. Uses Formspree if configured, then webhook, else mailto fallback.
+export const sendContactEmail = async (data: ContactEmailData): Promise<boolean> => {
+  const formspreeEndpoint =
+    ((import.meta as any)?.env?.VITE_FORMSPREE_CONTACT_ENDPOINT as string | undefined) ||
+    ((import.meta as any)?.env?.VITE_FORMSPREE_ENDPOINT as string | undefined);
+  const customWebhook = (import.meta as any)?.env?.VITE_EMAIL_WEBHOOK as string | undefined;
+  const contactEmail = ((import.meta as any)?.env?.VITE_CONTACT_EMAIL as string | undefined) || 'venu.min@gmail.com';
+
+  try {
+    if (formspreeEndpoint) {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      if (data.phone) formData.append('phone', data.phone);
+      formData.append('subject', data.subject);
+      formData.append('message', data.message);
+      if (data.deadline) formData.append('deadline', data.deadline.toISOString());
+      if (typeof data.allowWhatsApp === 'boolean') formData.append('allowWhatsApp', data.allowWhatsApp ? 'yes' : 'no');
+      formData.append('_subject', `New Contact: ${data.subject} — ${data.name}`);
+      formData.append('_replyto', data.email);
+      formData.append('_to', contactEmail);
+      if (data.attachment) formData.append('attachment', data.attachment);
+
+      const response = await fetch(formspreeEndpoint, { method: 'POST', body: formData });
+      return response.ok;
+    }
+
+    if (customWebhook) {
+      const response = await fetch(customWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, to: contactEmail, context: 'contact' }),
+      });
+      return response.ok;
+    }
+
+    // mailto fallback (no attachments)
+    const mailto = new URL(`mailto:${encodeURIComponent(contactEmail)}`);
+    const subject = `New Contact: ${data.subject} — ${data.name}`;
+    const bodyLines = [
+      `Name: ${data.name}`,
+      `Email: ${data.email}`,
+      data.phone ? `Phone: ${data.phone}` : undefined,
+      `Subject: ${data.subject}`,
+      data.deadline ? `Deadline: ${data.deadline.toDateString()}` : undefined,
+      typeof data.allowWhatsApp === 'boolean' ? `Allow WhatsApp: ${data.allowWhatsApp ? 'Yes' : 'No'}` : undefined,
+      '',
+      data.message,
+    ].filter(Boolean);
+    mailto.searchParams.set('subject', subject);
+    mailto.searchParams.set('body', bodyLines.join('%0D%0A'));
+    window.location.href = mailto.toString();
+    return true;
+  } catch (error) {
+    console.error('sendContactEmail error', error);
+    return false;
+  }
+};

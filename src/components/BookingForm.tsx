@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
 import { EmailData, sendBookingEmailWithFeedback } from '@/utils/emailService';
+import { getWhatsAppLink } from '@/utils/whatsapp';
 
 const bookingFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -76,6 +77,20 @@ const BookingForm = () => {
     const success = await sendBookingEmailWithFeedback(emailData);
     
     if (success) {
+      if (data.phone && data.phone.trim().length >= 8) {
+        const serviceTitle = services.find((s) => s.id === data.service)?.title || data.service;
+        const parts = [
+          `Hello! I'd like to book: ${serviceTitle}`,
+          `Name: ${data.name}`,
+          `Phone: ${data.phone}`,
+          `Quantity: ${data.quantity}`,
+          data.dimensions ? `Dimensions: ${data.dimensions}` : undefined,
+          selectedDate ? `Preferred Date: ${format(selectedDate, 'PPP')}` : undefined,
+          data.additionalInfo ? `Notes: ${data.additionalInfo}` : undefined,
+        ].filter(Boolean) as string[];
+        const waUrl = getWhatsAppLink(parts.join('. '));
+        try { window.open(waUrl, '_blank', 'noopener,noreferrer'); } catch {}
+      }
       // Reset form on success
       form.reset();
       setFile(null);
