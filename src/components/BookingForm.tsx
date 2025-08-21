@@ -75,6 +75,9 @@ const BookingForm = () => {
       ].filter(Boolean) as string[];
 
       const payload = {
+        access_key: (import.meta as any)?.env?.VITE_WEB3FORMS_KEY,
+        from_name: 'Sri Sharada Press Website',
+        subject: `New Booking: ${services.find((s) => s.id === data.service)?.title || data.service} — ${data.name}`,
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -82,15 +85,15 @@ const BookingForm = () => {
         details: detailsParts.join('. '),
       };
 
-      const res = await fetch('/api/booking', {
+      const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(text || `Request failed (${res.status})`);
+      const json = await res.json().catch(() => ({} as any));
+      if (!res.ok || json?.success !== true) {
+        throw new Error(json?.message || `Request failed (${res.status})`);
       }
 
       toast.dismiss(id);
