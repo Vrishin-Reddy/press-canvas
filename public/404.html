@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0;url=/" />
+  </head>
+  <body>
+    <script>
+      // SPA redirect for GitHub Pages: preserve path and query on reloads/deep-links
+      (function () {
+        var l = window.location;
+        var repo = '/' + (l.pathname.split('/')[1] || '');
+        var newUrl = repo + '/index.html' + l.search + l.hash;
+        l.replace(newUrl);
+      })();
+    </script>
+  </body>
+  </html>
+
+

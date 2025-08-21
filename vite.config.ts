@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  // Ensure proper asset paths on GitHub Pages (serves at /<repo>/)
+  base: mode === 'production' && process.env.GITHUB_ACTIONS
+    ? `/${(process.env.GITHUB_REPOSITORY || '').split('/')[1] || ''}/`
+    : '/',
   plugins: [
     react(),
     mode === 'development' &&
