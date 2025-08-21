@@ -16,7 +16,7 @@ import { Calendar } from '@/components/ui/calendar';
 
 import { Phone, Mail, MapPin, CalendarDays, Send, Paperclip } from 'lucide-react';
 import { getWhatsAppLink } from '@/utils/whatsapp';
-import { sendContactEmail } from '@/utils/emailService';
+import { useWeb3Submit } from '@/hooks/useWeb3Submit';
 import { toast } from 'sonner';
 import EmailLink from '@/components/EmailLink';
 
@@ -56,64 +56,19 @@ const Contact = () => {
   });
 
   const { handleSubmit, control, register, watch, reset, setValue, setFocus, formState } = methods;
-  const { errors, isSubmitting } = formState;
+  const { errors } = formState;
 
   const values = watch();
   const messageLength = (values.message ?? '').length;
 
-  const submittingRef = useRef(false);
+  const { onSubmit, isSubmitting: isSubmittingWeb3 } = useWeb3Submit((formEl) => {
+    const fd = new FormData(formEl);
+    const subject = (fd.get('subject') as string) || 'General Inquiry';
+    return { subject };
+  });
 
-  const onSubmit = async (data: FormValues) => {
-    if (submittingRef.current) return;
-    submittingRef.current = true;
-    if (data.website && data.website.trim().length > 0) {
-      // Honeypot filled: silently abort
-      submittingRef.current = false;
-      return;
-    }
-
-    try {
-      const success = await sendContactEmail({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        subject: data.subject,
-        message: data.message,
-        deadline: data.deadline,
-        allowWhatsApp: data.allowWhatsApp,
-        attachment: data.attachment as File | undefined,
-      });
-
-      if (success) {
-        if (data.phone && data.phone.trim().length >= 8) {
-          const whatsappText = `Hello! I would like to inquire about ${data.subject}. My name is ${data.name}. Phone: ${data.phone}. ${data.message}`;
-          const waUrl = getWhatsAppLink(whatsappText);
-          try {
-            window.open(waUrl, '_blank', 'noopener,noreferrer');
-          } catch {}
-        }
-        toast.success('Message sent successfully! We will get back to you soon.');
-        reset({
-          name: '',
-          email: '',
-          phone: '',
-          subject: 'General Inquiry',
-          message: '',
-          deadline: undefined,
-          allowWhatsApp: false,
-          attachment: undefined,
-          website: '',
-        });
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      } else {
-        toast.error('Failed to send your message. Please try again.');
-      }
-    } finally {
-      submittingRef.current = false;
-    }
-  };
+  // keep RHF isSubmitting in sync with our web3 submit state for disabling inputs
+  const isSubmitting = formState.isSubmitting || isSubmittingWeb3;
 
   const onError = () => {
     const firstErrorField = Object.keys(errors)[0] as keyof FormValues | undefined;
@@ -141,7 +96,7 @@ const Contact = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] gap-8">
             {/* LEFT: Form Card (RHF + zod) */}
             <FormProvider {...methods}>
-              <form onSubmit={handleSubmit(onSubmit, onError)} className="contents">
+              <form onSubmit={handleSubmit((_, e) => onSubmit(e as React.FormEvent<HTMLFormElement>), onError)} className="contents">
                 <Card className="rounded-2xl border border-muted/20 bg-background/60 backdrop-blur shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">

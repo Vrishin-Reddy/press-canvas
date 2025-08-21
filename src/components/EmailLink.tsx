@@ -32,22 +32,46 @@ export default function EmailLink({
     return `https://mail.google.com/mail/?view=cm&fs=1&${q.toString()}`;
   }, [email, subject, body]);
 
-  const onClick = () => {
-    setTimeout(() => {
-      const accept = window.confirm(
-        "It looks like no email app opened. Open Gmail compose instead?"
-      );
-      if (accept) {
-        try {
-          window.open(gmailCompose, "_blank", "noopener,noreferrer");
-        } catch {}
-      } else {
-        navigator.clipboard
-          .writeText(email)
-          .then(() => toast.success("Email address copied"))
-          .catch(() => toast.info(`Email: ${email}`));
+  const outlookCompose = React.useMemo(() => {
+    const q = new URLSearchParams();
+    q.set("to", email);
+    if (subject) q.set("subject", subject);
+    if (body) q.set("body", body || "");
+    // Works for outlook.live.com and redirects to sign-in if needed
+    return `https://outlook.live.com/mail/0/deeplink/compose?${q.toString()}`;
+  }, [email, subject, body]);
+
+  const isMobile = React.useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }, []);
+
+  const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isMobile) {
+      // Let the OS preferred mail app handle the mailto link
+      return;
+    }
+
+    // Desktop: offer a quick chooser for Gmail/Outlook/System
+    e.preventDefault();
+    const choice = window.prompt("Open email with: 1) Gmail  2) Outlook  3) Default app", "1");
+    try {
+      if (choice === "1") {
+        window.open(gmailCompose, "_blank", "noopener,noreferrer");
+        return;
       }
-    }, 800);
+      if (choice === "2") {
+        window.open(outlookCompose, "_blank", "noopener,noreferrer");
+        return;
+      }
+      // Fallback to system mail client
+      window.location.href = mailto;
+    } catch {
+      navigator.clipboard
+        .writeText(email)
+        .then(() => toast.success("Email address copied"))
+        .catch(() => toast.info(`Email: ${email}`));
+    }
   };
 
   return (

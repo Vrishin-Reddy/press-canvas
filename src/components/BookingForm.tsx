@@ -58,7 +58,7 @@ const BookingForm = () => {
 
   
 
-  const onSubmit = async (data: BookingFormValues) => {
+  const onSubmit = async (data: BookingFormValues, e?: React.BaseSyntheticEvent) => {
     if (submittingRef.current || isSubmitting) return;
     submittingRef.current = true;
     setIsSubmitting(true);
@@ -73,27 +73,37 @@ const BookingForm = () => {
         selectedDate ? `Preferred Date: ${format(selectedDate, 'PPP')}` : undefined,
         data.additionalInfo ? `Notes: ${data.additionalInfo}` : undefined,
       ].filter(Boolean) as string[];
+      const formEl = (e?.target as HTMLFormElement) || undefined;
+      const fd = formEl ? new FormData(formEl) : new FormData();
 
-      const payload = {
-        access_key: (import.meta as any)?.env?.VITE_WEB3FORMS_KEY,
-        from_name: 'Sri Sharada Press Website',
-        subject: `New Booking: ${services.find((s) => s.id === data.service)?.title || data.service} — ${data.name}`,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        service: services.find((s) => s.id === data.service)?.title || data.service,
-        details: detailsParts.join('. '),
-      };
+      const key = (import.meta as any)?.env?.VITE_WEB3FORMS_KEY as string | undefined;
+      if (!key) {
+        toast.dismiss(id);
+        toast.error('Missing VITE_WEB3FORMS_KEY. Add it in Vercel & .env, then redeploy.');
+        return;
+      }
+      fd.set('access_key', key);
+
+      const serviceTitle = services.find((s) => s.id === data.service)?.title || data.service;
+      fd.set('from_name', 'Sri Sharada Press Website');
+      fd.set('subject', `New Booking: ${serviceTitle} — ${data.name}`);
+      fd.set('name', data.name);
+      fd.set('email', data.email);
+      fd.set('phone', data.phone);
+      fd.set('service', serviceTitle);
+      fd.set('details', detailsParts.join('. '));
+      if (selectedDate) fd.set('preferredDate', selectedDate.toISOString());
+      if (file) fd.append('attachment', file);
 
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(payload),
+        headers: { Accept: 'application/json' },
+        body: fd,
       });
 
       const json = await res.json().catch(() => ({} as any));
-      if (!res.ok || json?.success !== true) {
-        throw new Error(json?.message || `Request failed (${res.status})`);
+      if (!res.ok || (json as any)?.success !== true) {
+        throw new Error((json as any)?.message || `Request failed (${res.status})`);
       }
 
       toast.dismiss(id);
@@ -126,6 +136,8 @@ const BookingForm = () => {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      {/* Hidden public key for Web3Forms (fallback) */}
+      <input type="hidden" name="access_key" value={(import.meta as any)?.env?.VITE_WEB3FORMS_KEY ?? ''} />
       {/* Personal Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Personal Information</h3>
