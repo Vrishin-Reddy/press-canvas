@@ -2,6 +2,7 @@ import BookingForm from '@/components/BookingForm';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Phone, Mail, ShieldCheck, Clock, CheckCircle2, MapPin } from 'lucide-react';
+import EmailLink from '@/components/EmailLink';
 import { getWhatsAppLink } from '@/utils/whatsapp';
 
 const Booking = () => {
@@ -45,9 +46,11 @@ const Booking = () => {
 									<a href="tel:+919391011520">
 										<Button className="w-full h-11" variant="secondary"><Phone className="h-4 w-4 mr-2" />Call</Button>
 									</a>
-									<a href="/contact">
-										<Button className="w-full h-11" variant="secondary"><Mail className="h-4 w-4 mr-2" />Email</Button>
-									</a>
+									<Button className="w-full h-11" variant="secondary" asChild>
+										<EmailLink email="sspress.1912@gmail.com" subject="Booking inquiry">
+											<span className="inline-flex items-center"><Mail className="h-4 w-4 mr-2" />Email</span>
+										</EmailLink>
+									</Button>
 									<a href={getWhatsAppLink("Hello! I'd like to inquire about a printing service.")} target="_blank" rel="noopener noreferrer">
 										<Button className="w-full h-11 bg-[#25D366] hover:bg-[#1EBE59] text-white">
 											<img src="/whatsapp_logo.png" alt="WhatsApp" className="h-5 w-5" />

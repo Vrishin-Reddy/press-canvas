@@ -18,6 +18,7 @@ import { Phone, Mail, MapPin, CalendarDays, Send, Paperclip } from 'lucide-react
 import { getWhatsAppLink } from '@/utils/whatsapp';
 import { sendContactEmail } from '@/utils/emailService';
 import { toast } from 'sonner';
+import EmailLink from '@/components/EmailLink';
 
 const schema = z.object({
   name: z.string().min(2, 'Please enter your full name'),
@@ -329,9 +330,11 @@ const Contact = () => {
                   <a href="tel:+919391011520">
                     <Button className="w-full h-11" variant="secondary"><Phone className="h-4 w-4 mr-2" /> Call</Button>
                   </a>
-                  <a href="/contact">
-                    <Button className="w-full h-11" variant="secondary"><Mail className="h-4 w-4 mr-2" /> Email</Button>
-                  </a>
+                  <Button className="w-full h-11" variant="secondary" asChild>
+                    <EmailLink email="sspress.1912@gmail.com" subject="Quick inquiry">
+                      <span className="inline-flex items-center"><Mail className="h-4 w-4 mr-2" /> Email</span>
+                    </EmailLink>
+                  </Button>
                   <a
                     href={getWhatsAppLink(`Hello! I would like to inquire about ${values.subject || 'your printing services'}. My name is ${values.name || ''}. ${values.message || ''}`)}
                     target="_blank" rel="noopener noreferrer"
@@ -374,7 +377,11 @@ const Contact = () => {
                     <div className="bg-primary/10 p-3 rounded-full"><Mail className="w-5 h-5 text-primary" /></div>
                     <div>
                       <div className="font-semibold">Email</div>
-                      <div className="text-muted-foreground">sspress.1912@gmail.com</div>
+                      <div className="text-muted-foreground">
+                        <EmailLink email="sspress.1912@gmail.com" subject="General inquiry" className="underline hover:opacity-80">
+                          sspress.1912@gmail.com
+                        </EmailLink>
+                      </div>
                       <div className="text-muted-foreground">For quotes and inquiries</div>
                     </div>
                   </div>

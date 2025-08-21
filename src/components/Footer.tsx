@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import EmailLink from "@/components/EmailLink";
 import {
   MapPin, Phone, Mail, ExternalLink, BookOpen, Layers,
   ArrowUp
@@ -96,9 +97,13 @@ const Footer = () => {
                 <Phone className="h-4 w-4 opacity-80" aria-hidden="true" /> +91 9391011520
               </a>
 
-              <a href="/contact" className="inline-flex items-center gap-2 hover:underline">
+              <EmailLink
+                email="sspress.1912@gmail.com"
+                subject="Inquiry from website"
+                className="inline-flex items-center gap-2 hover:underline"
+              >
                 <Mail className="h-4 w-4 opacity-80" aria-hidden="true" /> sspress.1912@gmail.com
-              </a>
+              </EmailLink>
             </address>
 
             {null}
@@ -173,10 +178,14 @@ const Footer = () => {
                     <span>+91 9391011520</span>
                   </a>
 
-                  <a href="/contact" className="flex items-center gap-2 hover:underline">
+                  <EmailLink
+                    email="sspress.1912@gmail.com"
+                    subject="Inquiry from website"
+                    className="flex items-center gap-2 hover:underline"
+                  >
                     <Mail className="h-4 w-4 opacity-80" aria-hidden="true" />
                     <span>sspress.1912@gmail.com</span>
-                  </a>
+                  </EmailLink>
                 </address>
               </AccordionContent>
             </AccordionItem>
