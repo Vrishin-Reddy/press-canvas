@@ -96,8 +96,8 @@ const Footer = () => {
                 <Phone className="h-4 w-4 opacity-80" aria-hidden="true" /> +91 9391011520
               </a>
 
-              <a href="mailto:venu.min@gmail.com" className="inline-flex items-center gap-2 hover:underline">
-                <Mail className="h-4 w-4 opacity-80" aria-hidden="true" /> venu.min@gmail.com
+              <a href="/contact" className="inline-flex items-center gap-2 hover:underline">
+                <Mail className="h-4 w-4 opacity-80" aria-hidden="true" /> sspress.1912@gmail.com
               </a>
             </address>
 
@@ -173,9 +173,9 @@ const Footer = () => {
                     <span>+91 9391011520</span>
                   </a>
 
-                  <a href="mailto:venu.min@gmail.com" className="flex items-center gap-2 hover:underline">
+                  <a href="/contact" className="flex items-center gap-2 hover:underline">
                     <Mail className="h-4 w-4 opacity-80" aria-hidden="true" />
-                    <span>venu.min@gmail.com</span>
+                    <span>sspress.1912@gmail.com</span>
                   </a>
                 </address>
               </AccordionContent>

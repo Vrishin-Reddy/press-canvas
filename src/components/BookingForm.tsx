@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,8 +17,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
-import { EmailData, sendBookingEmailWithFeedback } from '@/utils/emailService';
-import { getWhatsAppLink } from '@/utils/whatsapp';
+ 
+import { toast } from 'sonner';
 
 const bookingFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -39,6 +39,8 @@ const BookingForm = () => {
   
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const loadingToastIdRef = useRef<string | number | null>(null);
+  const submittingRef = useRef(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
 
   const form = useForm<BookingFormValues>({
@@ -57,48 +59,63 @@ const BookingForm = () => {
   
 
   const onSubmit = async (data: BookingFormValues) => {
+    if (submittingRef.current || isSubmitting) return;
+    submittingRef.current = true;
     setIsSubmitting(true);
     
-    // Create EmailData object ensuring all required fields are present
-    const emailData: EmailData = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      service: data.service,
-       quantity: data.quantity,
-      // Optional fields
-      dimensions: data.dimensions,
-       
-      preferredDate: selectedDate,
-      additionalInfo: data.additionalInfo,
-      file: file,
-    };
-    
-    const success = await sendBookingEmailWithFeedback(emailData);
-    
-    if (success) {
-      if (data.phone && data.phone.trim().length >= 8) {
-        const serviceTitle = services.find((s) => s.id === data.service)?.title || data.service;
-        const parts = [
-          `Hello! I'd like to book: ${serviceTitle}`,
-          `Name: ${data.name}`,
-          `Phone: ${data.phone}`,
-          `Quantity: ${data.quantity}`,
-          data.dimensions ? `Dimensions: ${data.dimensions}` : undefined,
-          selectedDate ? `Preferred Date: ${format(selectedDate, 'PPP')}` : undefined,
-          data.additionalInfo ? `Notes: ${data.additionalInfo}` : undefined,
-        ].filter(Boolean) as string[];
-        const waUrl = getWhatsAppLink(parts.join('. '));
-        try { window.open(waUrl, '_blank', 'noopener,noreferrer'); } catch {}
+    const id = toast.loading('Sending your booking request…');
+    loadingToastIdRef.current = id;
+
+    try {
+      const detailsParts = [
+        `Quantity: ${data.quantity}`,
+        data.dimensions ? `Dimensions: ${data.dimensions}` : undefined,
+        selectedDate ? `Preferred Date: ${format(selectedDate, 'PPP')}` : undefined,
+        data.additionalInfo ? `Notes: ${data.additionalInfo}` : undefined,
+      ].filter(Boolean) as string[];
+
+      const payload = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        service: services.find((s) => s.id === data.service)?.title || data.service,
+        details: detailsParts.join('. '),
+      };
+
+      const res = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(text || `Request failed (${res.status})`);
       }
+
+      toast.dismiss(id);
+      toast.success('Thanks! Your booking request was sent. We’ll reply shortly.');
       // Reset form on success
       form.reset();
       setFile(null);
       setSelectedDate(undefined);
+    } catch (err: any) {
+      toast.dismiss(id);
+      toast.error(err?.message ?? 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      loadingToastIdRef.current = null;
+      submittingRef.current = false;
     }
-    
-    setIsSubmitting(false);
   };
+
+  useEffect(() => {
+    return () => {
+      if (loadingToastIdRef.current != null) {
+        toast.dismiss(loadingToastIdRef.current);
+      }
+    };
+  }, []);
 
   const handleFileChange = (selectedFile: File | null) => {
     setFile(selectedFile);

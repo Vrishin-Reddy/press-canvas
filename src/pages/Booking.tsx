@@ -45,7 +45,7 @@ const Booking = () => {
 									<a href="tel:+919391011520">
 										<Button className="w-full h-11" variant="secondary"><Phone className="h-4 w-4 mr-2" />Call</Button>
 									</a>
-									<a href="mailto:venu.min@gmail.com">
+									<a href="/contact">
 										<Button className="w-full h-11" variant="secondary"><Mail className="h-4 w-4 mr-2" />Email</Button>
 									</a>
 									<a href={getWhatsAppLink("Hello! I'd like to inquire about a printing service.")} target="_blank" rel="noopener noreferrer">

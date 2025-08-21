@@ -60,48 +60,57 @@ const Contact = () => {
   const values = watch();
   const messageLength = (values.message ?? '').length;
 
+  const submittingRef = useRef(false);
+
   const onSubmit = async (data: FormValues) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     if (data.website && data.website.trim().length > 0) {
       // Honeypot filled: silently abort
+      submittingRef.current = false;
       return;
     }
 
-    const success = await sendContactEmail({
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      subject: data.subject,
-      message: data.message,
-      deadline: data.deadline,
-      allowWhatsApp: data.allowWhatsApp,
-      attachment: data.attachment as File | undefined,
-    });
-
-    if (success) {
-      if (data.phone && data.phone.trim().length >= 8) {
-        const whatsappText = `Hello! I would like to inquire about ${data.subject}. My name is ${data.name}. Phone: ${data.phone}. ${data.message}`;
-        const waUrl = getWhatsAppLink(whatsappText);
-        try {
-          window.open(waUrl, '_blank', 'noopener,noreferrer');
-        } catch {}
-      }
-      toast.success('Message sent successfully! We will get back to you soon.');
-      reset({
-        name: '',
-        email: '',
-        phone: '',
-        subject: 'General Inquiry',
-        message: '',
-        deadline: undefined,
-        allowWhatsApp: false,
-        attachment: undefined,
-        website: '',
+    try {
+      const success = await sendContactEmail({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        subject: data.subject,
+        message: data.message,
+        deadline: data.deadline,
+        allowWhatsApp: data.allowWhatsApp,
+        attachment: data.attachment as File | undefined,
       });
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+
+      if (success) {
+        if (data.phone && data.phone.trim().length >= 8) {
+          const whatsappText = `Hello! I would like to inquire about ${data.subject}. My name is ${data.name}. Phone: ${data.phone}. ${data.message}`;
+          const waUrl = getWhatsAppLink(whatsappText);
+          try {
+            window.open(waUrl, '_blank', 'noopener,noreferrer');
+          } catch {}
+        }
+        toast.success('Message sent successfully! We will get back to you soon.');
+        reset({
+          name: '',
+          email: '',
+          phone: '',
+          subject: 'General Inquiry',
+          message: '',
+          deadline: undefined,
+          allowWhatsApp: false,
+          attachment: undefined,
+          website: '',
+        });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        toast.error('Failed to send your message. Please try again.');
       }
-    } else {
-      toast.error('Failed to send your message. Please try again.');
+    } finally {
+      submittingRef.current = false;
     }
   };
 
@@ -320,7 +329,7 @@ const Contact = () => {
                   <a href="tel:+919391011520">
                     <Button className="w-full h-11" variant="secondary"><Phone className="h-4 w-4 mr-2" /> Call</Button>
                   </a>
-                  <a href="mailto:venu.min@gmail.com">
+                  <a href="/contact">
                     <Button className="w-full h-11" variant="secondary"><Mail className="h-4 w-4 mr-2" /> Email</Button>
                   </a>
                   <a
@@ -365,7 +374,7 @@ const Contact = () => {
                     <div className="bg-primary/10 p-3 rounded-full"><Mail className="w-5 h-5 text-primary" /></div>
                     <div>
                       <div className="font-semibold">Email</div>
-                      <div className="text-muted-foreground">venu.min@gmail.com</div>
+                      <div className="text-muted-foreground">sspress.1912@gmail.com</div>
                       <div className="text-muted-foreground">For quotes and inquiries</div>
                     </div>
                   </div>
