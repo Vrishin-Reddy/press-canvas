@@ -153,26 +153,29 @@ const Footer = () => {
             <AccordionItem value="contact">
               <AccordionTrigger>Contact Us</AccordionTrigger>
               <AccordionContent>
-                <address className="not-italic text-base space-y-2 break-words">
+                <address className="not-italic text-base space-y-3">
                   <a
                     href={MAPS_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Open in Google Maps"
-                    className="group inline-flex items-start gap-2 hover:text-brand-dark-cyan transition-colors"
+                    className="flex items-start gap-2 hover:text-brand-dark-cyan transition-colors"
                     aria-label={`Open ${ADDRESS} in Google Maps`}
                   >
-                    <span className="relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-brand-dark-cyan after:transition-all group-hover:after:w-full break-words">
+                    <MapPin className="mt-0.5 h-4 w-4 opacity-80" aria-hidden="true" />
+                    <span className="relative break-words after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-brand-dark-cyan after:transition-all hover:after:w-full">
                       {ADDRESS}
                     </span>
                   </a>
 
-                  <a href="tel:+919391011520" className="inline-flex items-center gap-2 hover:underline">
-                    +91 9391011520
+                  <a href="tel:+919391011520" className="flex items-center gap-2 hover:underline">
+                    <Phone className="h-4 w-4 opacity-80" aria-hidden="true" />
+                    <span>+91 9391011520</span>
                   </a>
 
-                  <a href="mailto:venu.min@gmail.com" className="inline-flex items-center gap-2 hover:underline">
-                    venu.min@gmail.com
+                  <a href="mailto:venu.min@gmail.com" className="flex items-center gap-2 hover:underline">
+                    <Mail className="h-4 w-4 opacity-80" aria-hidden="true" />
+                    <span>venu.min@gmail.com</span>
                   </a>
                 </address>
               </AccordionContent>
@@ -188,7 +191,7 @@ const Footer = () => {
 
       <button
         onClick={scrollToTop}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-10 w-10 rounded-full bg-brand-tangerine-500 text-brand-white shadow-md hover:bg-brand-tangerine-400 focus-visible:ring-2"
+        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 h-10 w-10 rounded-full bg-brand-tangerine-500 text-brand-white shadow-md hover:bg-brand-tangerine-400 focus-visible:ring-2"
         aria-label="Back to top"
       >
         <ArrowUp className="h-5 w-5 mx-auto" aria-hidden />

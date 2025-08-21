@@ -59,7 +59,7 @@ const Navbar = () => {
   // 
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-[env(safe-area-inset-top)] z-50">
       {/* Top gradient accent bar that fades in on scroll */}
       <div className={`h-0.5 bg-gradient-to-r from-brand-dark-cyan-500 via-brand-tangerine-500 to-brand-jasper-500 transition-opacity ${accentOpacity}`} />
 
@@ -69,7 +69,7 @@ const Navbar = () => {
           <div className="h-full bg-brand-tangerine-500 transition-[width] duration-200" style={{ width: `${progress}%` }} />
         </div>
 
-        <div className={`container mx-auto px-4 ${navHeightClass} motion-safe:transition-[height] flex items-center justify-between`}>
+        <div className={`container mx-auto px-4 ${navHeightClass} motion-safe:transition-[height] flex items-center justify-between pt-[env(safe-area-inset-top)]`}>
           {/* Left: Brand */}
           <Link to="/" className="inline-flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
             <img src="/logo.png" alt="Sri Sharada Press logo" className="h-12 w-12 sm:h-16 sm:w-16 md:h-24 md:w-24 rounded-full object-cover ring-1 ring-muted/30" />
@@ -113,7 +113,7 @@ const Navbar = () => {
                   {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[85vw] sm:w-[380px] p-0 backdrop-blur-md">
+              <SheetContent side="left" className="w-[85vw] sm:w-[380px] p-0 backdrop-blur-md pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]">
                 <div id="mobile-menu" className="flex h-full flex-col">
                   <div className="px-4 py-4 border-b">
                     <Link to="/" onClick={() => setOpen(false)} className="inline-flex items-center gap-3">
