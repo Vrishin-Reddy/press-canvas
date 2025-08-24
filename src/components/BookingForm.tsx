@@ -17,8 +17,10 @@ import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
 import { getWeb3Key } from '@/lib/getWeb3Key';
+import { uploadToUploadcare } from '@/lib/uploadcare';
 
 const WEB3_ENDPOINT = "https://api.web3forms.com/submit";
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
@@ -32,20 +34,14 @@ const BookingForm = () => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const formEl = formRef.current;
-    if (!formEl) {
-      toast.error("Form not ready. Please refresh and try again.");
-      return;
-    }
-
-    // Build FormData from the actual <form>
+    const formEl = formRef.current!;
     const fd = new FormData(formEl);
 
-    // Inject Web3Forms key using helper
+    // Web3Forms access key (must exist)
     const key = getWeb3Key(formEl);
-    if (!key) {
-      toast.error("Web3Forms key not found. Set VITE_WEB3FORMS_KEY and redeploy.");
-      return;
+    if (!key) { 
+      toast.error("Web3Forms key not found. Set VITE_WEB3FORMS_KEY and redeploy."); 
+      return; 
     }
     fd.set("access_key", key);
 
@@ -67,31 +63,71 @@ const BookingForm = () => {
     // Find service title
     const serviceTitle = services.find((s) => s.id === service)?.title || service;
     
-    // Helpful metadata
+    // Optional metadata
     fd.set("from_name", "Sri Sharada Press Website");
     fd.set("subject", `New Booking: ${serviceTitle} — ${name}`);
     fd.set("details", detailsParts.join('. '));
     if (selectedDate) fd.set("preferredDate", selectedDate.toISOString());
 
-    setIsSubmitting(true);
-    const tid = toast.loading("Sending your booking request…");
+    // Handle file(s) via Uploadcare
+    const fileInput = formEl.querySelector<HTMLInputElement>('input[name="attachment"]');
+    const files = fileInput?.files;
+    let uploadedUrls: string[] = [];
 
+    if (files && files.length) {
+      const pubKey = import.meta.env.VITE_UPLOADCARE_PUBLIC_KEY as string | undefined;
+      if (!pubKey) { 
+        toast.error("Set VITE_UPLOADCARE_PUBLIC_KEY to upload files."); 
+        return; 
+      }
+
+      for (const f of Array.from(files)) {
+        if (f.size > MAX_FILE_BYTES) { 
+          toast.error(`"${f.name}" exceeds 10MB limit.`); 
+          return; 
+        }
+      }
+
+      const upId = toast.loading("Uploading file(s)...");
+      try {
+        for (const f of Array.from(files)) {
+          uploadedUrls.push(await uploadToUploadcare(f));
+        }
+        toast.dismiss(upId);
+      } catch (err: any) {
+        toast.dismiss(upId);
+        toast.error(err?.message || "File upload failed.");
+        return;
+      }
+
+      // Send links instead of raw files (avoid Pro requirement)
+      fd.delete("attachment");
+      fd.set("attachment_urls", uploadedUrls.join(", "));
+      const currentDetails = String(fd.get("details") || "");
+      if (uploadedUrls.length) {
+        const updatedDetails = `${currentDetails}\n\nAttached file(s):\n${uploadedUrls.map(u => `• ${u}`).join("\n")}`;
+        fd.set("details", updatedDetails);
+      }
+    }
+
+    setIsSubmitting(true);
+    const sendId = toast.loading("Sending your booking request…");
     try {
-      const res = await fetch(WEB3_ENDPOINT, {
-        method: "POST",
-        headers: { Accept: "application/json" }, // don't set Content-Type for FormData
-        body: fd,
+      const res = await fetch(WEB3_ENDPOINT, { 
+        method: "POST", 
+        headers: { Accept: "application/json" }, 
+        body: fd 
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data?.success !== true) {
         throw new Error(data?.message || `Request failed (${res.status})`);
       }
-      toast.dismiss(tid);
-      toast.success("Thanks! Your request was sent.");
-      formEl.reset(); // also clears file input
+      toast.dismiss(sendId);
+      toast.success("Thanks! Your booking request was sent.");
+      formEl.reset();
       setSelectedDate(undefined);
     } catch (err: any) {
-      toast.dismiss(tid);
+      toast.dismiss(sendId);
       toast.error(err?.message || "Failed to send. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -233,6 +269,7 @@ const BookingForm = () => {
         <input 
           name="attachment" 
           type="file" 
+          multiple
           accept=".pdf,.png,.jpg,.jpeg,.svg,.tiff"
           disabled={isSubmitting}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
