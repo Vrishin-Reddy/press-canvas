@@ -1,8 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
@@ -19,125 +16,93 @@ import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
+import { getWeb3Key } from '@/lib/getWeb3Key';
 
-const bookingFormSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  phone: z.string().min(10, { message: 'Please enter a valid phone number' }),
-  service: z.string().min(1, { message: 'Please select a service' }),
-  dimensions: z.string().optional(),
-  quantity: z.coerce.number().min(1, { message: 'Quantity must be at least 1' }),
-  preferredDate: z.date().optional(),
-  additionalInfo: z.string().optional(),
-});
-
-type BookingFormValues = z.infer<typeof bookingFormSchema>;
+const WEB3_ENDPOINT = "https://api.web3forms.com/submit";
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
   const preselectedService = searchParams.get('service') || '';
   
-  const [file, setFile] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const loadingToastIdRef = useRef<string | number | null>(null);
-  const submittingRef = useRef(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const [selectedDate, setSelectedDate] = React.useState<Date>();
 
-  const form = useForm<BookingFormValues>({
-    resolver: zodResolver(bookingFormSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      service: preselectedService,
-      dimensions: '',
-      quantity: 1,
-      additionalInfo: '',
-    },
-  });
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isSubmitting) return;
 
-  
+    const formEl = formRef.current;
+    if (!formEl) {
+      toast.error("Form not ready. Please refresh and try again.");
+      return;
+    }
 
-  const onSubmit = async (data: BookingFormValues, e?: React.BaseSyntheticEvent) => {
-    if (submittingRef.current || isSubmitting) return;
-    submittingRef.current = true;
-    setIsSubmitting(true);
+    // Build FormData from the actual <form>
+    const fd = new FormData(formEl);
+
+    // Inject Web3Forms key using helper
+    const key = getWeb3Key(formEl);
+    if (!key) {
+      toast.error("Web3Forms key not found. Set VITE_WEB3FORMS_KEY and redeploy.");
+      return;
+    }
+    fd.set("access_key", key);
+
+    // Get values from form data
+    const name = String(fd.get("name") || "");
+    const service = String(fd.get("service") || "");
+    const quantity = String(fd.get("quantity") || "1");
+    const dimensions = String(fd.get("dimensions") || "");
+    const additionalInfo = String(fd.get("additionalInfo") || "");
     
-    const id = toast.loading('Sending your booking request…');
-    loadingToastIdRef.current = id;
+    // Build details
+    const detailsParts = [
+      `Quantity: ${quantity}`,
+      dimensions ? `Dimensions: ${dimensions}` : undefined,
+      selectedDate ? `Preferred Date: ${format(selectedDate, 'PPP')}` : undefined,
+      additionalInfo ? `Notes: ${additionalInfo}` : undefined,
+    ].filter(Boolean) as string[];
+
+    // Find service title
+    const serviceTitle = services.find((s) => s.id === service)?.title || service;
+    
+    // Helpful metadata
+    fd.set("from_name", "Sri Sharada Press Website");
+    fd.set("subject", `New Booking: ${serviceTitle} — ${name}`);
+    fd.set("details", detailsParts.join('. '));
+    if (selectedDate) fd.set("preferredDate", selectedDate.toISOString());
+
+    setIsSubmitting(true);
+    const tid = toast.loading("Sending your booking request…");
 
     try {
-      const detailsParts = [
-        `Quantity: ${data.quantity}`,
-        data.dimensions ? `Dimensions: ${data.dimensions}` : undefined,
-        selectedDate ? `Preferred Date: ${format(selectedDate, 'PPP')}` : undefined,
-        data.additionalInfo ? `Notes: ${data.additionalInfo}` : undefined,
-      ].filter(Boolean) as string[];
-      const formEl = (e?.target as HTMLFormElement) || undefined;
-      const fd = formEl ? new FormData(formEl) : new FormData();
-
-      const key = (import.meta as any)?.env?.VITE_WEB3FORMS_KEY as string | undefined;
-      if (!key) {
-        toast.dismiss(id);
-        toast.error('Missing VITE_WEB3FORMS_KEY. Add it in Vercel & .env, then redeploy.');
-        return;
-      }
-      fd.set('access_key', key);
-
-      const serviceTitle = services.find((s) => s.id === data.service)?.title || data.service;
-      fd.set('from_name', 'Sri Sharada Press Website');
-      fd.set('subject', `New Booking: ${serviceTitle} — ${data.name}`);
-      fd.set('name', data.name);
-      fd.set('email', data.email);
-      fd.set('phone', data.phone);
-      fd.set('service', serviceTitle);
-      fd.set('details', detailsParts.join('. '));
-      if (selectedDate) fd.set('preferredDate', selectedDate.toISOString());
-      if (file) fd.append('attachment', file);
-
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
+      const res = await fetch(WEB3_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json" }, // don't set Content-Type for FormData
         body: fd,
       });
-
-      const json = await res.json().catch(() => ({} as any));
-      if (!res.ok || (json as any)?.success !== true) {
-        throw new Error((json as any)?.message || `Request failed (${res.status})`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.success !== true) {
+        throw new Error(data?.message || `Request failed (${res.status})`);
       }
-
-      toast.dismiss(id);
-      toast.success('Thanks! Your booking request was sent. We’ll reply shortly.');
-      // Reset form on success
-      form.reset();
-      setFile(null);
+      toast.dismiss(tid);
+      toast.success("Thanks! Your request was sent.");
+      formEl.reset(); // also clears file input
       setSelectedDate(undefined);
     } catch (err: any) {
-      toast.dismiss(id);
-      toast.error(err?.message ?? 'Something went wrong. Please try again.');
+      toast.dismiss(tid);
+      toast.error(err?.message || "Failed to send. Please try again.");
     } finally {
       setIsSubmitting(false);
-      loadingToastIdRef.current = null;
-      submittingRef.current = false;
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (loadingToastIdRef.current != null) {
-        toast.dismiss(loadingToastIdRef.current);
-      }
-    };
-  }, []);
-
-  const handleFileChange = (selectedFile: File | null) => {
-    setFile(selectedFile);
-  };
-
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {/* Hidden public key for Web3Forms (fallback) */}
-      <input type="hidden" name="access_key" value={(import.meta as any)?.env?.VITE_WEB3FORMS_KEY ?? ''} />
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-6" noValidate>
+      {/* Hidden fallback so key exists even if JS bundles late */}
+      <input type="hidden" name="access_key" value="0200243a-3bf9-4172-b2b8-b6cad84bd455" />
+      
       {/* Personal Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Personal Information</h3>
@@ -147,37 +112,34 @@ const BookingForm = () => {
             <Label htmlFor="name">Full Name *</Label>
             <Input 
               id="name" 
+              name="name"
               placeholder="Your full name" 
-              {...form.register('name')}
+              required
+              disabled={isSubmitting}
             />
-            {form.formState.errors.name && (
-              <p className="text-brand-jasper-500 text-sm">{form.formState.errors.name.message}</p>
-            )}
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="email">Email Address *</Label>
             <Input 
               id="email" 
+              name="email"
               type="email" 
               placeholder="your.email@example.com" 
-              {...form.register('email')}
+              required
+              disabled={isSubmitting}
             />
-            {form.formState.errors.email && (
-              <p className="text-brand-jasper-500 text-sm">{form.formState.errors.email.message}</p>
-            )}
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number *</Label>
             <Input 
               id="phone" 
+              name="phone"
               placeholder="Your phone number" 
-              {...form.register('phone')}
+              required
+              disabled={isSubmitting}
             />
-            {form.formState.errors.phone && (
-              <p className="text-brand-jasper-500 text-sm">{form.formState.errors.phone.message}</p>
-            )}
           </div>
         </div>
       </div>
@@ -189,32 +151,30 @@ const BookingForm = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="service">Service Type *</Label>
-            <Select 
-              defaultValue={preselectedService} 
-              onValueChange={(value) => form.setValue('service', value)}
+            <select 
+              id="service"
+              name="service" 
+              defaultValue={preselectedService}
+              required
+              disabled={isSubmitting}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a service" />
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
-                    {service.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.service && (
-              <p className="text-brand-jasper-500 text-sm">{form.formState.errors.service.message}</p>
-            )}
+              <option value="">Select a service</option>
+              {services.map((service) => (
+                <option key={service.id} value={service.id}>
+                  {service.title}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="dimensions">Dimensions (if applicable)</Label>
             <Input 
               id="dimensions" 
+              name="dimensions"
               placeholder="e.g., 3ft x 2ft" 
-              {...form.register('dimensions')}
+              disabled={isSubmitting}
             />
           </div>
           
@@ -222,13 +182,13 @@ const BookingForm = () => {
             <Label htmlFor="quantity">Quantity *</Label>
             <Input 
               id="quantity" 
+              name="quantity"
               type="number" 
               min="1" 
-              {...form.register('quantity')}
+              defaultValue="1"
+              required
+              disabled={isSubmitting}
             />
-            {form.formState.errors.quantity && (
-              <p className="text-brand-jasper-500 text-sm">{form.formState.errors.quantity.message}</p>
-            )}
           </div>
           
           <div className="space-y-2">
@@ -236,7 +196,9 @@ const BookingForm = () => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="outline"
+                  disabled={isSubmitting}
                   className={cn(
                     "w-full justify-start text-left font-normal",
                     !selectedDate && "text-muted-foreground"
@@ -257,8 +219,6 @@ const BookingForm = () => {
             </Popover>
           </div>
         </div>
-        
-        
       </div>
 
       {/* File Upload */}
@@ -270,7 +230,13 @@ const BookingForm = () => {
           </p>
         </div>
         
-        <FileUpload onFileChange={handleFileChange} />
+        <input 
+          name="attachment" 
+          type="file" 
+          accept=".pdf,.png,.jpg,.jpeg,.svg,.tiff"
+          disabled={isSubmitting}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        />
       </div>
 
       {/* Additional Information */}
@@ -278,13 +244,14 @@ const BookingForm = () => {
         <Label htmlFor="additionalInfo">Additional Information (optional)</Label>
         <Textarea 
           id="additionalInfo" 
+          name="additionalInfo"
           placeholder="Any specific requirements or instructions for your order?" 
-          {...form.register('additionalInfo')}
+          disabled={isSubmitting}
         />
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting} aria-busy={isSubmitting}>
         {isSubmitting ? 'Submitting...' : 'Submit Booking Request'}
       </Button>
     </form>

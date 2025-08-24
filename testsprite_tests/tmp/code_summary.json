@@ -1,0 +1,139 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React 18",
+    "Vite 5",
+    "Tailwind CSS",
+    "shadcn/ui",
+    "React Router",
+    "TanStack Query",
+    "React Hook Form",
+    "Zod",
+    "Sonner",
+    "Vercel Analytics"
+  ],
+  "features": [
+    {
+      "name": "App shell and routing",
+      "description": "Root app composition with router, query client, tooltip provider, and global Toaster.",
+      "files": [
+        "src/main.tsx",
+        "src/App.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/Footer.tsx",
+        "src/components/ScrollToTop.tsx",
+        "src/components/layout/Container.tsx"
+      ]
+    },
+    {
+      "name": "Home and marketing sections",
+      "description": "Homepage hero, services highlights, testimonials, printing process, and why-choose section.",
+      "files": [
+        "src/pages/Index.tsx",
+        "src/components/Hero.tsx",
+        "src/components/ServicesSection.tsx",
+        "src/components/PrintingProcess.tsx",
+        "src/components/WhyChooseFlexPrint.tsx",
+        "src/components/HomeTestimonials.tsx"
+      ]
+    },
+    {
+      "name": "Services listing",
+      "description": "Service cards and list for the services page.",
+      "files": [
+        "src/pages/Services.tsx",
+        "src/components/ServiceCard.tsx",
+        "src/components/ServicesList.tsx"
+      ]
+    },
+    {
+      "name": "Portfolio and testimonials pages",
+      "description": "Static portfolio and testimonials routes.",
+      "files": [
+        "src/pages/Portfolio.tsx",
+        "src/pages/Testimonials.tsx"
+      ]
+    },
+    {
+      "name": "About page",
+      "description": "About page with company information and sections.",
+      "files": [
+        "src/pages/About.tsx",
+        "src/components/AboutPage.tsx",
+        "src/components/AboutSection.tsx"
+      ]
+    },
+    {
+      "name": "Booking flow",
+      "description": "Booking form with validation, file upload, and Web3Forms submission.",
+      "files": [
+        "src/pages/Booking.tsx",
+        "src/components/BookingForm.tsx",
+        "src/components/FileUpload.tsx",
+        "src/components/ServicesList.tsx"
+      ]
+    },
+    {
+      "name": "Contact flow",
+      "description": "Contact form using RHF+Zod with Web3Forms via reusable hook and helper.",
+      "files": [
+        "src/pages/Contact.tsx",
+        "src/hooks/useWeb3Submit.ts",
+        "src/lib/web3forms.ts"
+      ]
+    },
+    {
+      "name": "Email link behavior",
+      "description": "Opens system mail app on mobile; desktop prompt for Gmail/Outlook/default.",
+      "files": [
+        "src/components/EmailLink.tsx"
+      ]
+    },
+    {
+      "name": "UI component library",
+      "description": "shadcn/ui-based primitives (buttons, inputs, dialogs, etc).",
+      "files": [
+        "src/components/ui/button.tsx",
+        "src/components/ui/input.tsx",
+        "src/components/ui/textarea.tsx",
+        "src/components/ui/select.tsx",
+        "src/components/ui/toaster.tsx",
+        "src/components/ui/alert-dialog.tsx",
+        "src/components/ui/dialog.tsx",
+        "src/components/ui/*"
+      ]
+    },
+    {
+      "name": "Hooks and utilities",
+      "description": "Common hooks and utilities for responsiveness, toasts, and class utilities.",
+      "files": [
+        "src/hooks/use-mobile.tsx",
+        "src/hooks/use-toast.ts",
+        "src/lib/utils.ts",
+        "src/utils/whatsapp.ts",
+        "src/utils/emailService.ts"
+      ]
+    },
+    {
+      "name": "Routing pages and 404",
+      "description": "Additional routes and not-found page.",
+      "files": [
+        "src/pages/NotFound.tsx",
+        "src/pages/legacy.tsx"
+      ]
+    },
+    {
+      "name": "Configuration",
+      "description": "Build tooling, Tailwind and TypeScript configuration, and Vite setup.",
+      "files": [
+        "vite.config.ts",
+        "tailwind.config.ts",
+        "tsconfig.json",
+        "tsconfig.app.json",
+        "tsconfig.node.json",
+        "eslint.config.js",
+        "postcss.config.js"
+      ]
+    }
+  ]
+}
