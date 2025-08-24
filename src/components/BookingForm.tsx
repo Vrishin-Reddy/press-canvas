@@ -16,22 +16,7 @@ import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
-
-type AttachOut = { filename: string; content: string; contentType?: string; size?: number };
-
-async function filesToBase64(inputs: HTMLInputElement[]): Promise<AttachOut[]> {
-  const outs: AttachOut[] = [];
-  for (const input of inputs) {
-    const files = input.files;
-    if (!files) continue;
-    for (const f of Array.from(files)) {
-      const buf = await f.arrayBuffer();
-      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-      outs.push({ filename: f.name, content: b64, contentType: f.type || undefined, size: f.size });
-    }
-  }
-  return outs;
-}
+import { filesToBase64 } from '@/lib/filesToBase64';
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
@@ -72,6 +57,7 @@ const BookingForm = () => {
 
     // Build JSON payload
     const payload = {
+      sources: "booking",
       name,
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
@@ -89,7 +75,7 @@ const BookingForm = () => {
     setIsSubmitting(true);
     const tid = toast.loading("Sending your booking request…");
     try {
-      const res = await fetch("/api/booking", {
+      const res = await fetch("/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

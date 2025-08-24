@@ -13,22 +13,7 @@ import { Phone, Mail, MapPin, CalendarDays, Send, Paperclip } from 'lucide-react
 import { getWhatsAppLink } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import EmailLink from '@/components/EmailLink';
-
-type AttachOut = { filename: string; content: string; contentType?: string; size?: number };
-
-async function filesToBase64(inputs: HTMLInputElement[]): Promise<AttachOut[]> {
-  const outs: AttachOut[] = [];
-  for (const input of inputs) {
-    const files = input.files;
-    if (!files) continue;
-    for (const f of Array.from(files)) {
-      const buf = await f.arrayBuffer();
-      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-      outs.push({ filename: f.name, content: b64, contentType: f.type || undefined, size: f.size });
-    }
-  }
-  return outs;
-}
+import { filesToBase64 } from '@/lib/filesToBase64';
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -53,6 +38,7 @@ const Contact = () => {
 
     // Build JSON payload
     const payload = {
+      sources: "contact",
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
@@ -69,7 +55,7 @@ const Contact = () => {
     setIsSubmitting(true);
     const tid = toast.loading("Sending your message…");
     try {
-      const res = await fetch("/api/booking", {
+      const res = await fetch("/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
