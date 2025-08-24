@@ -16,11 +16,22 @@ import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
-import { getWeb3Key } from '@/lib/getWeb3Key';
-import { uploadToUploadcare } from '@/lib/uploadcare';
 
-const WEB3_ENDPOINT = "https://api.web3forms.com/submit";
-const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
+type AttachOut = { filename: string; content: string; contentType?: string; size?: number };
+
+async function filesToBase64(inputs: HTMLInputElement[]): Promise<AttachOut[]> {
+  const outs: AttachOut[] = [];
+  for (const input of inputs) {
+    const files = input.files;
+    if (!files) continue;
+    for (const f of Array.from(files)) {
+      const buf = await f.arrayBuffer();
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      outs.push({ filename: f.name, content: b64, contentType: f.type || undefined, size: f.size });
+    }
+  }
+  return outs;
+}
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
@@ -34,16 +45,12 @@ const BookingForm = () => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const formEl = formRef.current!;
-    const fd = new FormData(formEl);
+    const form = formRef.current!;
+    const fd = new FormData(form);
 
-    // Web3Forms access key (must exist)
-    const key = getWeb3Key(formEl);
-    if (!key) { 
-      toast.error("Web3Forms key not found. Set VITE_WEB3FORMS_KEY and redeploy."); 
-      return; 
-    }
-    fd.set("access_key", key);
+    // Collect files (optional)
+    const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
+    const attachments = await filesToBase64(fileInputs);
 
     // Get values from form data
     const name = String(fd.get("name") || "");
@@ -52,7 +59,7 @@ const BookingForm = () => {
     const dimensions = String(fd.get("dimensions") || "");
     const additionalInfo = String(fd.get("additionalInfo") || "");
     
-    // Build details
+    // Build details message
     const detailsParts = [
       `Quantity: ${quantity}`,
       dimensions ? `Dimensions: ${dimensions}` : undefined,
@@ -62,72 +69,38 @@ const BookingForm = () => {
 
     // Find service title
     const serviceTitle = services.find((s) => s.id === service)?.title || service;
-    
-    // Optional metadata
-    fd.set("from_name", "Sri Sharada Press Website");
-    fd.set("subject", `New Booking: ${serviceTitle} — ${name}`);
-    fd.set("details", detailsParts.join('. '));
-    if (selectedDate) fd.set("preferredDate", selectedDate.toISOString());
 
-    // Handle file(s) via Uploadcare
-    const fileInput = formEl.querySelector<HTMLInputElement>('input[name="attachment"]');
-    const files = fileInput?.files;
-    let uploadedUrls: string[] = [];
+    // Build JSON payload
+    const payload = {
+      name,
+      email: String(fd.get("email") || ""),
+      phone: String(fd.get("phone") || ""),
+      subject: `New Booking: ${serviceTitle}`,
+      service: serviceTitle,
+      message: detailsParts.join('. '),
+      attachments: attachments.length ? attachments : undefined,
+    };
 
-    if (files && files.length) {
-      const pubKey = import.meta.env.VITE_UPLOADCARE_PUBLIC_KEY as string | undefined;
-      if (!pubKey) { 
-        toast.error("Set VITE_UPLOADCARE_PUBLIC_KEY to upload files."); 
-        return; 
-      }
-
-      for (const f of Array.from(files)) {
-        if (f.size > MAX_FILE_BYTES) { 
-          toast.error(`"${f.name}" exceeds 10MB limit.`); 
-          return; 
-        }
-      }
-
-      const upId = toast.loading("Uploading file(s)...");
-      try {
-        for (const f of Array.from(files)) {
-          uploadedUrls.push(await uploadToUploadcare(f));
-        }
-        toast.dismiss(upId);
-      } catch (err: any) {
-        toast.dismiss(upId);
-        toast.error(err?.message || "File upload failed.");
-        return;
-      }
-
-      // Send links instead of raw files (avoid Pro requirement)
-      fd.delete("attachment");
-      fd.set("attachment_urls", uploadedUrls.join(", "));
-      const currentDetails = String(fd.get("details") || "");
-      if (uploadedUrls.length) {
-        const updatedDetails = `${currentDetails}\n\nAttached file(s):\n${uploadedUrls.map(u => `• ${u}`).join("\n")}`;
-        fd.set("details", updatedDetails);
-      }
+    if (!payload.name || !payload.email || !payload.message) {
+      toast.error("Please fill name, email, and service details.");
+      return;
     }
 
     setIsSubmitting(true);
-    const sendId = toast.loading("Sending your booking request…");
+    const tid = toast.loading("Sending your booking request…");
     try {
-      const res = await fetch(WEB3_ENDPOINT, { 
-        method: "POST", 
-        headers: { Accept: "application/json" }, 
-        body: fd 
+      const res = await fetch("/api/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.success !== true) {
-        throw new Error(data?.message || `Request failed (${res.status})`);
-      }
-      toast.dismiss(sendId);
+      if (!res.ok) throw new Error(await res.text());
+      toast.dismiss(tid);
       toast.success("Thanks! Your booking request was sent.");
-      formEl.reset();
+      form.reset();
       setSelectedDate(undefined);
     } catch (err: any) {
-      toast.dismiss(sendId);
+      toast.dismiss(tid);
       toast.error(err?.message || "Failed to send. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -136,9 +109,6 @@ const BookingForm = () => {
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="space-y-6" noValidate>
-      {/* Hidden fallback so key exists even if JS bundles late */}
-      <input type="hidden" name="access_key" value="0200243a-3bf9-4172-b2b8-b6cad84bd455" />
-      
       {/* Personal Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Personal Information</h3>
