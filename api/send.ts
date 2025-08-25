@@ -46,7 +46,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const to = process.env.DEST_EMAIL || user;
     if (!user || !pass || !to) return res.status(500).send("Email is not configured.");
 
-    const transporter = nodemailer.createTransporter({ service: "gmail", auth: { user, pass } });
+    // NOTE: createTransporter is incorrect; use createTransport.
+    const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
 
     const subj = data.subject || (data.service ? `New Booking: ${data.service} — ${data.name}` : `New Message — ${data.name}`);
     const origin = data.sources ? ` (${data.sources})` : "";
