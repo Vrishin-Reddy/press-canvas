@@ -57,7 +57,7 @@ const BookingForm = () => {
 
     // Build JSON payload
     const payload = {
-      sources: "booking",
+      source: "booking" as const,
       name,
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),

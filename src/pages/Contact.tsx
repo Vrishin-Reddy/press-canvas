@@ -38,7 +38,7 @@ const Contact = () => {
 
     // Build JSON payload
     const payload = {
-      sources: "contact",
+      source: "contact" as const,
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),

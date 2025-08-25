@@ -10,7 +10,7 @@ type Payload = {
   subject?: string;
   message: string;
   service?: string;
-  sources?: string;           // "contact" or "booking" (optional)
+  source?: "contact" | "booking";   // form source (optional)
   attachments?: AttachIn[];   // base64 content
 };
 
@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
 
     const subj = data.subject || (data.service ? `New Booking: ${data.service} — ${data.name}` : `New Message — ${data.name}`);
-    const origin = data.sources ? ` (${data.sources})` : "";
+    const origin = data.source ? ` (${data.source})` : "";
 
     const html = `
       <h2>New Website Submission${origin}</h2>
@@ -79,9 +79,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 function esc(s: string) {
   return String(s)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
