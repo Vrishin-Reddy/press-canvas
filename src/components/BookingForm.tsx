@@ -34,7 +34,7 @@ const BookingForm = () => {
     const fd = new FormData(form);
 
     // Collect files (optional)
-    const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
+    const fileInputs = form.querySelectorAll<HTMLInputElement>('input[type="file"]');
     const attachments = await filesToBase64(fileInputs);
 
     // Get values from form data

@@ -1,7 +1,7 @@
 // src/lib/filesToBase64.ts
 export type AttachOut = { filename: string; content: string; contentType?: string; size?: number };
 
-export async function filesToBase64(inputs: HTMLInputElement[]): Promise<AttachOut[]> {
+export async function filesToBase64(inputs: Iterable<HTMLInputElement>): Promise<AttachOut[]> {
   const outs: AttachOut[] = [];
   for (const input of inputs) {
     const files = input.files;
