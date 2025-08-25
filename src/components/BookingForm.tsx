@@ -75,12 +75,9 @@ const BookingForm = () => {
     setIsSubmitting(true);
     const tid = toast.loading("Sending your booking request…");
     try {
-      const res = await fetch("/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(await res.text());
+      const { sendEmail } = await import('@/utils/emailService');
+      const result = await sendEmail(payload);
+      if (!result.ok) throw new Error("Failed to send booking request");
       toast.dismiss(tid);
       toast.success("Thanks! Your booking request was sent.");
       form.reset();
