@@ -54,9 +54,6 @@ jobs:
           path: dist  # Vite default
 
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     # Explicit permissions for the job too, avoids integration access errors on some repos
