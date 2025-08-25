@@ -13,7 +13,7 @@ import { Phone, Mail, MapPin, CalendarDays, Send, Paperclip } from 'lucide-react
 import { getWhatsAppLink } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import EmailLink from '@/components/EmailLink';
-import { filesToBase64 } from '@/lib/filesToBase64';
+import { filesToBase64, sendToEdge } from '@/lib/sendForm';
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -33,18 +33,30 @@ const Contact = () => {
     const fd = new FormData(form);
 
     // Collect files (optional)
-    const fileInputs = form.querySelectorAll<HTMLInputElement>('input[type="file"]');
+    const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
     const attachments = await filesToBase64(fileInputs);
+    const total = attachments.reduce((s, a) => s + (a.size || 0), 0);
+    if (total > 8 * 1024 * 1024) {
+      toast.error("Attachments too large (limit 8MB total).");
+      return;
+    }
 
-    // Build JSON payload
+    // Check honeypot
+    const botcheck = String(fd.get("botcheck") || "");
+    if (botcheck) {
+      toast.error("Spam detected. Please try again.");
+      return;
+    }
+
+    // Build JSON payload for Edge Function
     const payload = {
-      sources: "contact",
+      source: "contact" as const,
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
       subject: String(fd.get("subject") || "Contact Request"),
       message: String(fd.get("message") || ""),
-      attachments: attachments.length ? attachments : undefined,
+      attachments: attachments.length ? attachments.map(({ size, ...rest }) => rest) : undefined,
     };
 
     if (!payload.name || !payload.email || !payload.message) {
@@ -55,12 +67,7 @@ const Contact = () => {
     setIsSubmitting(true);
     const tid = toast.loading("Sending your message…");
     try {
-      const res = await fetch("/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(await res.text());
+      await sendToEdge(payload);
       toast.dismiss(tid);
       toast.success("Thanks! Your message was sent.");
       form.reset();
@@ -102,9 +109,9 @@ const Contact = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Honeypot */}
-                  <div className="sr-only">
-                    <Label htmlFor="website">Website</Label>
-                    <Input id="website" name="website" placeholder="Your website" aria-hidden="true" tabIndex={-1} />
+                  <div className="hidden">
+                    <Label htmlFor="botcheck">Bot Check</Label>
+                    <Input id="botcheck" name="botcheck" placeholder="Leave empty" aria-hidden="true" tabIndex={-1} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -16,7 +16,7 @@ import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
-import { filesToBase64 } from '@/lib/filesToBase64';
+import { filesToBase64, sendToEdge } from '@/lib/sendForm';
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
@@ -34,8 +34,20 @@ const BookingForm = () => {
     const fd = new FormData(form);
 
     // Collect files (optional)
-    const fileInputs = form.querySelectorAll<HTMLInputElement>('input[type="file"]');
+    const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
     const attachments = await filesToBase64(fileInputs);
+    const total = attachments.reduce((s, a) => s + (a.size || 0), 0);
+    if (total > 8 * 1024 * 1024) {
+      toast.error("Attachments too large (limit 8MB total).");
+      return;
+    }
+
+    // Check honeypot
+    const botcheck = String(fd.get("botcheck") || "");
+    if (botcheck) {
+      toast.error("Spam detected. Please try again.");
+      return;
+    }
 
     // Get values from form data
     const name = String(fd.get("name") || "");
@@ -55,16 +67,16 @@ const BookingForm = () => {
     // Find service title
     const serviceTitle = services.find((s) => s.id === service)?.title || service;
 
-    // Build JSON payload
+    // Build JSON payload for Edge Function
     const payload = {
-      sources: "booking",
+      source: "booking" as const,
       name,
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
       subject: `New Booking: ${serviceTitle}`,
       service: serviceTitle,
       message: detailsParts.join('. '),
-      attachments: attachments.length ? attachments : undefined,
+      attachments: attachments.length ? attachments.map(({ size, ...rest }) => rest) : undefined,
     };
 
     if (!payload.name || !payload.email || !payload.message) {
@@ -75,12 +87,7 @@ const BookingForm = () => {
     setIsSubmitting(true);
     const tid = toast.loading("Sending your booking request…");
     try {
-      const res = await fetch("/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(await res.text());
+      await sendToEdge(payload);
       toast.dismiss(tid);
       toast.success("Thanks! Your booking request was sent.");
       form.reset();
@@ -95,6 +102,12 @@ const BookingForm = () => {
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="space-y-6" noValidate>
+      {/* Honeypot */}
+      <div className="hidden">
+        <label htmlFor="botcheck">Bot Check</label>
+        <input id="botcheck" name="botcheck" placeholder="Leave empty" aria-hidden="true" tabIndex={-1} />
+      </div>
+
       {/* Personal Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Personal Information</h3>
