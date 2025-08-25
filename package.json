@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "scan:vercel": "node tools/scan-legacy-config.js"
+    "scan:vercel": "node tools/scan-legacy-config.js",
+    "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=18"
