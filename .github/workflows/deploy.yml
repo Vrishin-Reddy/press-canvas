@@ -42,10 +42,7 @@ jobs:
 
       - name: Setup Pages
         if: ${{ !github.event.repository.fork }}
-        uses: actions/configure-pages@v5
-        with:
-          # Permissions are already set at top-level; this step just prepares Pages
-          static_site_generator: vite
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
         if: ${{ !github.event.repository.fork }}
