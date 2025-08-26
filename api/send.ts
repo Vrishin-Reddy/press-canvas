@@ -14,14 +14,30 @@ type Payload = {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Add CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method === "GET") return res.status(200).send("OK");
   if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
 
   try {
-    const data = req.body as Payload;
+    // Parse request body properly
+    let data: Payload;
+    if (typeof req.body === 'string') {
+      data = JSON.parse(req.body);
+    } else {
+      data = req.body as Payload;
+    }
 
     if (!data?.name || !data?.email || !data?.message) {
-      return res.status(400).send("Missing required fields: name, email, message");
+      return res.status(400).json({ 
+        error: "Missing required fields", 
+        required: ["name", "email", "message"],
+        received: { name: !!data?.name, email: !!data?.email, message: !!data?.message }
+      });
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -29,7 +45,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const RESEND_TO = process.env.RESEND_TO || "sspress.1912@gmail.com";
 
     if (!RESEND_API_KEY || !RESEND_FROM) {
-      return res.status(500).send("Email not configured (RESEND_API_KEY/RESEND_FROM).");
+      return res.status(500).json({
+        error: "Email service not configured",
+        missing: {
+          RESEND_API_KEY: !RESEND_API_KEY,
+          RESEND_FROM: !RESEND_FROM
+        }
+      });
     }
 
     const subj =
@@ -71,13 +93,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!resendRes.ok) {
       const errText = await resendRes.text().catch(() => "");
-      return res.status(502).send(errText || "Resend error");
+      console.error('Resend API error:', errText);
+      return res.status(502).json({ 
+        error: "Email service error", 
+        details: errText || "Unknown Resend error",
+        status: resendRes.status
+      });
     }
 
     const json = await resendRes.json().catch(() => ({}));
+    console.log('Email sent successfully:', json?.id);
     return res.status(200).json({ ok: true, id: json?.id });
   } catch (e: any) {
-    return res.status(500).send(e?.message || "Internal Error");
+    console.error('Function error:', e);
+    return res.status(500).json({ 
+      error: "Internal server error", 
+      message: e?.message || "Unknown error",
+      stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+    });
   }
 }
 
