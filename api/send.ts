@@ -1,4 +1,6 @@
-// api/send.ts — Edge runtime email relay via Resend REST API
+// api/send.ts — Vercel Node.js runtime email relay via Resend REST API
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
 type AttachIn = { filename: string; content: string; content_type?: string };
 type Payload = {
   source?: "contact" | "booking";
@@ -11,17 +13,15 @@ type Payload = {
   attachments?: AttachIn[];
 };
 
-const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
-
-export default async function handler(req: Request): Promise<Response> {
-  if (req.method === "GET") return new Response("OK", { status: 200 });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === "GET") return res.status(200).send("OK");
+  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
 
   try {
-    const data = (await req.json()) as Payload;
+    const data = req.body as Payload;
 
     if (!data?.name || !data?.email || !data?.message) {
-      return new Response("Missing required fields: name, email, message", { status: 400 });
+      return res.status(400).send("Missing required fields: name, email, message");
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -29,7 +29,7 @@ export default async function handler(req: Request): Promise<Response> {
     const RESEND_TO = process.env.RESEND_TO || "sspress.1912@gmail.com";
 
     if (!RESEND_API_KEY || !RESEND_FROM) {
-      return new Response("Email not configured (RESEND_API_KEY/RESEND_FROM).", { status: 500 });
+      return res.status(500).send("Email not configured (RESEND_API_KEY/RESEND_FROM).");
     }
 
     const subj =
@@ -60,7 +60,7 @@ export default async function handler(req: Request): Promise<Response> {
       })),
     };
 
-    const res = await fetch("https://api.resend.com/emails", {
+    const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${RESEND_API_KEY}`,
@@ -69,15 +69,15 @@ export default async function handler(req: Request): Promise<Response> {
       body: JSON.stringify(body),
     });
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      return new Response(errText || "Resend error", { status: 502, headers: JSON_HEADERS });
+    if (!resendRes.ok) {
+      const errText = await resendRes.text().catch(() => "");
+      return res.status(502).send(errText || "Resend error");
     }
 
-    const json = await res.json().catch(() => ({}));
-    return new Response(JSON.stringify({ ok: true, id: json?.id }), { status: 200, headers: JSON_HEADERS });
+    const json = await resendRes.json().catch(() => ({}));
+    return res.status(200).json({ ok: true, id: json?.id });
   } catch (e: any) {
-    return new Response(e?.message || "Internal Error", { status: 500, headers: JSON_HEADERS });
+    return res.status(500).send(e?.message || "Internal Error");
   }
 }
 
