@@ -1,8 +1,10 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "functions": {
-    "api/send.ts": { "runtime": "edge" }
+    "api/send.ts": {
+      "runtime": "@vercel/node@18"
+    }
   },
-  "buildCommand": "vite build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist"
 }
