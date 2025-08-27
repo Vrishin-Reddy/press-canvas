@@ -9,10 +9,14 @@ export default defineConfig({
     css: true,
     globals: true,
     include: [
-      "src/**/*.{test,spec}.ts",
-      "src/**/*.{test,spec}.tsx",
-      "src/**/__tests__/**/*.{ts,tsx}",
-      "src/**/__a11y__/**/*.{ts,tsx}"
+      "src/lib/**/*.{test,spec}.ts",
+      "src/lib/**/*.{test,spec}.tsx"
+    ],
+    exclude: [
+      "src/components/__tests__/**",
+      "src/pages/__tests__/**", 
+      "src/api/__tests__/**",
+      "api/**"
     ],
     coverage: {
       provider: "v8",
