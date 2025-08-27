@@ -36,21 +36,34 @@ jobs:
           VITE_CONTACT_EMAIL: ${{ secrets.VITE_CONTACT_EMAIL }}
           VITE_FORMSPREE_ENDPOINT: ${{ secrets.VITE_FORMSPREE_ENDPOINT }}
           VITE_FORMSPREE_CONTACT_ENDPOINT: ${{ secrets.VITE_FORMSPREE_CONTACT_ENDPOINT }}
+<<<<<<< HEAD
           VITE_EMAIL_WEBHOOK: ${{ secrets.VITE_EMAIL_WEBHOOK || '' }}
+=======
+          VITE_EMAIL_WEBHOOK: ${{ secrets.VITE_EMAIL_WEBHOOK }}
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
           VITE_WHATSAPP_NUMBER: ${{ secrets.VITE_WHATSAPP_NUMBER }}
         run: npm run build
 
       - name: Setup Pages
+<<<<<<< HEAD
         if: ${{ !github.event.repository.fork }}
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         if: ${{ !github.event.repository.fork }}
+=======
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true  # <-- auto-enable GitHub Pages if not enabled
+
+      - name: Upload artifact
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist  # Vite default
 
   deploy:
+<<<<<<< HEAD
     runs-on: ubuntu-latest
     needs: build
     # Explicit permissions for the job too, avoids integration access errors on some repos
@@ -61,5 +74,14 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         if: ${{ !github.event.repository.fork }}
+=======
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
         id: deployment
         uses: actions/deploy-pages@v4

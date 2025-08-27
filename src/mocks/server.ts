@@ -7,7 +7,11 @@ export const handlers = [
     if (!body?.name || !body?.email || !body?.message) {
       return new HttpResponse("Missing required fields", { status: 400 });
     }
+<<<<<<< HEAD
     return HttpResponse.json({ ok: true, id: "test-email-id" });
+=======
+    return HttpResponse.json({ ok: true });
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
   }),
 ];
 

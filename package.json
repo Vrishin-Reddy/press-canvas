@@ -8,12 +8,32 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+<<<<<<< HEAD
     "preview": "vite preview",
     "scan:vercel": "node tools/scan-legacy-config.js",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": "18.x"
+=======
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "coverage": "vitest --run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "a11y:components": "vitest --run src/**/__a11y__/*.test.ts?(x)",
+    "a11y:pages": "playwright test -g \"a11y\"",
+    "perf": "lhci autorun",
+    "preview": "vite preview",
+    "scan:vercel": "node tools/scan-legacy-config.js"
+  },
+  "engines": {
+    "node": ">=18"
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -62,7 +82,10 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
+<<<<<<< HEAD
     "react-phone-input-2": "^2.15.1",
+=======
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
     "react-resizable-panels": "^2.1.3",
     "react-router-dom": "^6.26.2",
     "recharts": "^2.12.7",

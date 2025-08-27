@@ -13,7 +13,10 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+<<<<<<< HEAD
     "types": ["react", "react-dom", "node"],
+=======
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
 
     /* Linting */
     "strict": false,

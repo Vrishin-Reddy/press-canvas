@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+<<<<<<< HEAD
   build: {
     chunkSizeWarningLimit: 1000, // Increase limit to 1MB to reduce warnings
     rollupOptions: {
@@ -34,4 +35,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+=======
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
 }));

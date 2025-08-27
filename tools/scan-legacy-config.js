@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import fs from "node:fs";
 import path from "node:path";
 
@@ -23,12 +24,20 @@ function checkObjectForLegacy(obj, filePath, pathTrail = []) {
     }
   }
 }
+=======
+const fs = require("fs");
+const path = require("path");
+
+const banned = [/\"builds\"\s*:/i, /\"use\"\s*:/i, /@now\//i, /now-/i, /@vercel\/node\"\s*:/i]; // unversioned "use"
+const hit = [];
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
 
 function scan(dir) {
   for (const f of fs.readdirSync(dir)) {
     if (f === "node_modules" || f.startsWith(".")) continue;
     const p = path.join(dir, f);
     const stat = fs.statSync(p);
+<<<<<<< HEAD
     if (stat.isDirectory()) {
       scan(p);
     } else if (/\.(json|jsonc|yml|yaml)$/i.test(f)) {
@@ -38,14 +47,27 @@ function scan(dir) {
         checkObjectForLegacy(json, p);
       } catch (_) {
         // ignore non-JSON or commented JSON files
+=======
+    if (stat.isDirectory()) scan(p);
+    else if (/\.(json|js|ts|cjs|mjs|jsonc)$/i.test(f)) {
+      const s = fs.readFileSync(p, "utf8");
+      for (const re of banned) {
+        if (re.test(s)) hit.push(`${p} :: matches ${re}`);
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
       }
     }
   }
 }
+<<<<<<< HEAD
 
 scan(process.cwd());
 if (findings.length) {
   console.error("❌ Legacy Now/Vercel config found:\n" + findings.join("\n"));
+=======
+scan(process.cwd());
+if (hit.length) {
+  console.error("❌ Legacy Now/Vercel config found:\n" + hit.join("\n"));
+>>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
   process.exit(1);
 } else {
   console.log("✅ No legacy config detected.");
