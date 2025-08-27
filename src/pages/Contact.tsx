@@ -13,12 +13,7 @@ import { Phone, Mail, MapPin, CalendarDays, Send, Paperclip } from 'lucide-react
 import { getWhatsAppLink } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import EmailLink from '@/components/EmailLink';
-<<<<<<< HEAD
-import { filesToBase64, sendToEdge } from '@/lib/sendForm';
 import PhoneInput from '@/components/PhoneInput';
-=======
-import { filesToBase64 } from '@/lib/filesToBase64';
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -27,10 +22,7 @@ const Contact = () => {
   const [messageLength, setMessageLength] = React.useState(0);
   const [formValues, setFormValues] = React.useState({
     name: '',
-<<<<<<< HEAD
     phone: '',
-=======
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
     subject: 'General Inquiry'
   });
 
@@ -41,16 +33,6 @@ const Contact = () => {
     const form = formRef.current!;
     const fd = new FormData(form);
 
-    // Collect files (optional)
-    const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
-    const attachments = await filesToBase64(fileInputs);
-<<<<<<< HEAD
-    const total = attachments.reduce((s, a) => s + (a.size || 0), 0);
-    if (total > 8 * 1024 * 1024) {
-      toast.error("Attachments too large (limit 8MB total).");
-      return;
-    }
-
     // Check honeypot
     const botcheck = String(fd.get("botcheck") || "");
     if (botcheck) {
@@ -58,57 +40,52 @@ const Contact = () => {
       return;
     }
 
-    // Build JSON payload for Edge Function
-=======
+    // Build data for WhatsApp
+    const name = String(fd.get("name") || "");
+    const email = String(fd.get("email") || "");
+    const phone = String(fd.get("phone") || "");
+    const subject = String(fd.get("subject") || "Contact Request");
+    const message = String(fd.get("message") || "");
+    const deadline = fd.get("deadline") ? new Date(String(fd.get("deadline"))).toLocaleDateString() : "";
 
-    // Build JSON payload
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
-    const payload = {
-      source: "contact" as const,
-      name: String(fd.get("name") || ""),
-      email: String(fd.get("email") || ""),
-      phone: String(fd.get("phone") || ""),
-      subject: String(fd.get("subject") || "Contact Request"),
-      message: String(fd.get("message") || ""),
-<<<<<<< HEAD
-      attachments: attachments.length ? attachments.map(({ size, ...rest }) => rest) : undefined,
-    };
-
-    if (!payload.name || !payload.email || !payload.phone || !payload.message) {
-      toast.error("Please fill name, email, phone, and message.");
-=======
-      attachments: attachments.length ? attachments : undefined,
-    };
-
-    if (!payload.name || !payload.email || !payload.message) {
-      toast.error("Please fill name, email, and message.");
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
+    if (!name || !email || !phone || !message) {
+      toast.error("Please fill all required fields (name, email, phone, and message).");
       return;
     }
 
     setIsSubmitting(true);
-    const tid = toast.loading("Sending your message…");
+    const tid = toast.loading("Preparing WhatsApp message…");
+    
     try {
-<<<<<<< HEAD
-      await sendToEdge(payload);
-=======
-      const { sendEmail } = await import('@/utils/emailService');
-      const result = await sendEmail(payload);
-      if (!result.ok) throw new Error("Failed to send email");
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
+      // Build WhatsApp message
+      const whatsappMessage = `*New Contact Form Submission*
+
+*Name:* ${name}
+*Email:* ${email}
+*Phone:* ${phone}
+*Subject:* ${subject}
+${deadline ? `*Deadline:* ${deadline}` : ''}
+
+*Message:*
+${message}
+
+Sent from website contact form.`;
+
+      // Open WhatsApp with the message
+      const whatsappUrl = getWhatsAppLink(whatsappMessage);
+      window.open(whatsappUrl, '_blank');
+      
       toast.dismiss(tid);
-      toast.success("Thanks! Your message was sent.");
+      toast.success("Opening WhatsApp with your message!");
+      
+      // Reset form
       form.reset();
       setSelectedDate(undefined);
       setMessageLength(0);
-<<<<<<< HEAD
       setFormValues({ name: '', phone: '', subject: 'General Inquiry' });
-=======
-      setFormValues({ name: '', subject: 'General Inquiry' });
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
     } catch (err: any) {
       toast.dismiss(tid);
-      toast.error(err?.message || "Failed to send. Please try again.");
+      toast.error("Failed to prepare message. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -141,15 +118,9 @@ const Contact = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Honeypot */}
-<<<<<<< HEAD
                   <div className="hidden">
                     <Label htmlFor="botcheck">Bot Check</Label>
                     <Input id="botcheck" name="botcheck" placeholder="Leave empty" aria-hidden="true" tabIndex={-1} />
-=======
-                  <div className="sr-only">
-                    <Label htmlFor="website">Website</Label>
-                    <Input id="website" name="website" placeholder="Your website" aria-hidden="true" tabIndex={-1} />
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -183,7 +154,6 @@ const Contact = () => {
 
                     {/* Phone */}
                     <div className="space-y-2">
-<<<<<<< HEAD
                       <Label htmlFor="phone">Phone Number<span className="text-destructive"> *</span></Label>
                       <PhoneInput 
                         id="phone" 
@@ -192,16 +162,6 @@ const Contact = () => {
                         required
                         className="focus-visible:ring-2 focus-visible:ring-brand-dark-cyan/40 focus-visible:ring-offset-2"
                         onChange={(value) => setFormValues(prev => ({ ...prev, phone: value }))}
-=======
-                      <Label htmlFor="phone">Phone (optional)</Label>
-                      <Input 
-                        id="phone" 
-                        name="phone"
-                        type="tel" 
-                        placeholder="e.g., +91 9391011520" 
-                        disabled={isSubmitting} 
-                        className="w-full focus-visible:ring-2 focus-visible:ring-brand-dark-cyan/40 focus-visible:ring-offset-2" 
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
                       />
                     </div>
 
@@ -292,8 +252,8 @@ const Contact = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row gap-3">
-                  <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="flex-1 bg-brand-tangerine-500 text-brand-white hover:bg-brand-tangerine-400">
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="flex-1 bg-[#25D366] hover:bg-[#1EBE59] text-white">
+                    {isSubmitting ? 'Preparing...' : 'Send via WhatsApp'}
                   </Button>
                   <Button
                     type="button"
@@ -304,11 +264,7 @@ const Contact = () => {
                         formRef.current.reset();
                         setSelectedDate(undefined);
                         setMessageLength(0);
-<<<<<<< HEAD
                         setFormValues({ name: '', phone: '', subject: 'General Inquiry' });
-=======
-                        setFormValues({ name: '', subject: 'General Inquiry' });
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
                       }
                     }}
                   >
