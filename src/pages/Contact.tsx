@@ -14,6 +14,7 @@ import { getWhatsAppLink } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import EmailLink from '@/components/EmailLink';
 import { filesToBase64, sendToEdge } from '@/lib/sendForm';
+import PhoneInput from '@/components/PhoneInput';
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -22,6 +23,7 @@ const Contact = () => {
   const [messageLength, setMessageLength] = React.useState(0);
   const [formValues, setFormValues] = React.useState({
     name: '',
+    phone: '',
     subject: 'General Inquiry'
   });
 
@@ -59,8 +61,8 @@ const Contact = () => {
       attachments: attachments.length ? attachments.map(({ size, ...rest }) => rest) : undefined,
     };
 
-    if (!payload.name || !payload.email || !payload.message) {
-      toast.error("Please fill name, email, and message.");
+    if (!payload.name || !payload.email || !payload.phone || !payload.message) {
+      toast.error("Please fill name, email, phone, and message.");
       return;
     }
 
@@ -73,7 +75,7 @@ const Contact = () => {
       form.reset();
       setSelectedDate(undefined);
       setMessageLength(0);
-      setFormValues({ name: '', subject: 'General Inquiry' });
+      setFormValues({ name: '', phone: '', subject: 'General Inquiry' });
     } catch (err: any) {
       toast.dismiss(tid);
       toast.error(err?.message || "Failed to send. Please try again.");
@@ -145,14 +147,14 @@ const Contact = () => {
 
                     {/* Phone */}
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone (optional)</Label>
-                      <Input 
+                      <Label htmlFor="phone">Phone Number<span className="text-destructive"> *</span></Label>
+                      <PhoneInput 
                         id="phone" 
                         name="phone"
-                        type="tel" 
-                        placeholder="e.g., +91 9391011520" 
                         disabled={isSubmitting} 
-                        className="w-full focus-visible:ring-2 focus-visible:ring-brand-dark-cyan/40 focus-visible:ring-offset-2" 
+                        required
+                        className="focus-visible:ring-2 focus-visible:ring-brand-dark-cyan/40 focus-visible:ring-offset-2"
+                        onChange={(value) => setFormValues(prev => ({ ...prev, phone: value }))}
                       />
                     </div>
 
@@ -255,7 +257,7 @@ const Contact = () => {
                         formRef.current.reset();
                         setSelectedDate(undefined);
                         setMessageLength(0);
-                        setFormValues({ name: '', subject: 'General Inquiry' });
+                        setFormValues({ name: '', phone: '', subject: 'General Inquiry' });
                       }
                     }}
                   >

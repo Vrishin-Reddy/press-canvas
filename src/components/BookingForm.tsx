@@ -17,6 +17,7 @@ import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
 import { filesToBase64, sendToEdge } from '@/lib/sendForm';
+import PhoneInput from '@/components/PhoneInput';
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
@@ -79,8 +80,8 @@ const BookingForm = () => {
       attachments: attachments.length ? attachments.map(({ size, ...rest }) => rest) : undefined,
     };
 
-    if (!payload.name || !payload.email || !payload.message) {
-      toast.error("Please fill name, email, and service details.");
+    if (!payload.name || !payload.email || !payload.phone || !payload.message) {
+      toast.error("Please fill name, email, phone, and service details.");
       return;
     }
 
@@ -138,10 +139,9 @@ const BookingForm = () => {
           
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number *</Label>
-            <Input 
+            <PhoneInput 
               id="phone" 
               name="phone"
-              placeholder="Your phone number" 
               required
               disabled={isSubmitting}
             />
