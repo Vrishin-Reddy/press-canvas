@@ -16,12 +16,8 @@ import FileUpload from '@/components/FileUpload';
 import { services } from '@/components/ServicesList';
  
 import { toast } from 'sonner';
-<<<<<<< HEAD
-import { filesToBase64, sendToEdge } from '@/lib/sendForm';
 import PhoneInput from '@/components/PhoneInput';
-=======
-import { filesToBase64 } from '@/lib/filesToBase64';
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
+import { sendBookingEmail } from '@/utils/emailService';
 
 const BookingForm = () => {
   const [searchParams] = useSearchParams();
@@ -38,24 +34,21 @@ const BookingForm = () => {
     const form = formRef.current!;
     const fd = new FormData(form);
 
-    // Collect files (optional)
-    const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
-    const attachments = await filesToBase64(fileInputs);
-<<<<<<< HEAD
-    const total = attachments.reduce((s, a) => s + (a.size || 0), 0);
-    if (total > 8 * 1024 * 1024) {
-      toast.error("Attachments too large (limit 8MB total).");
-      return;
-    }
-
-    // Check honeypot
+    // Honeypot (spam) check
     const botcheck = String(fd.get("botcheck") || "");
     if (botcheck) {
       toast.error("Spam detected. Please try again.");
       return;
     }
-=======
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
+
+    // Collect files (optional) and validate total size (<= 8MB)
+    const fileInput = form.querySelector<HTMLInputElement>('input[name="attachment"]');
+    const files = fileInput?.files ? Array.from(fileInput.files) : [];
+    const total = files.reduce((s, f) => s + f.size, 0);
+    if (total > 8 * 1024 * 1024) {
+      toast.error("Attachments too large (limit 8MB total).");
+      return;
+    }
 
     // Get values from form data
     const name = String(fd.get("name") || "");
@@ -75,45 +68,30 @@ const BookingForm = () => {
     // Find service title
     const serviceTitle = services.find((s) => s.id === service)?.title || service;
 
-<<<<<<< HEAD
-    // Build JSON payload for Edge Function
-=======
-    // Build JSON payload
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
+    // Build payload for email service
+    const firstFile = files[0] ?? null;
     const payload = {
-      source: "booking" as const,
       name,
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
-      subject: `New Booking: ${serviceTitle}`,
       service: serviceTitle,
-      message: detailsParts.join('. '),
-<<<<<<< HEAD
-      attachments: attachments.length ? attachments.map(({ size, ...rest }) => rest) : undefined,
+      dimensions: dimensions || undefined,
+      quantity: parseInt(quantity, 10) || 1,
+      preferredDate: selectedDate,
+      additionalInfo: additionalInfo || undefined,
+      file: firstFile,
     };
 
-    if (!payload.name || !payload.email || !payload.phone || !payload.message) {
+    if (!payload.name || !payload.email || !payload.phone || !payload.service) {
       toast.error("Please fill name, email, phone, and service details.");
-=======
-      attachments: attachments.length ? attachments : undefined,
-    };
-
-    if (!payload.name || !payload.email || !payload.message) {
-      toast.error("Please fill name, email, and service details.");
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
       return;
     }
 
     setIsSubmitting(true);
     const tid = toast.loading("Sending your booking request…");
     try {
-<<<<<<< HEAD
-      await sendToEdge(payload);
-=======
-      const { sendEmail } = await import('@/utils/emailService');
-      const result = await sendEmail(payload);
-      if (!result.ok) throw new Error("Failed to send booking request");
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
+      const ok = await sendBookingEmail(payload);
+      if (!ok) throw new Error("Failed to send booking request");
       toast.dismiss(tid);
       toast.success("Thanks! Your booking request was sent.");
       form.reset();
@@ -128,15 +106,11 @@ const BookingForm = () => {
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="space-y-6" noValidate>
-<<<<<<< HEAD
       {/* Honeypot */}
       <div className="hidden">
         <label htmlFor="botcheck">Bot Check</label>
         <input id="botcheck" name="botcheck" placeholder="Leave empty" aria-hidden="true" tabIndex={-1} />
       </div>
-
-=======
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
       {/* Personal Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Personal Information</h3>
@@ -167,16 +141,9 @@ const BookingForm = () => {
           
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number *</Label>
-<<<<<<< HEAD
             <PhoneInput 
               id="phone" 
               name="phone"
-=======
-            <Input 
-              id="phone" 
-              name="phone"
-              placeholder="Your phone number" 
->>>>>>> e725d928e6f4f8c5d7c283483279184bcd76fc85
               required
               disabled={isSubmitting}
             />
